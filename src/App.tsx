@@ -451,6 +451,42 @@ export default function App() {
     triggerToast("Signed out. Public visitor sandbox mode active.");
   };
 
+  const handleSyncToCodebase = async () => {
+    // Collect 100% of the active state that normally sits in localStorage
+    try {
+      const stateDump = {
+        profile,
+        projects,
+        blogs,
+        dsaPlatforms,
+        learningAreas,
+        extracurriculars,
+        experiences,
+        spotlightProject,
+        featuredBlog,
+        heroHeadline,
+        introDuration,
+        introSteps,
+        workingCategory,
+        workingTitle,
+        workingDesc,
+        themeId: activeTheme.id
+      };
+      
+      triggerToast("🔄 Syncing local state to codebase...");
+      
+      const res = await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stateDump)
+      });
+      if (!res.ok) throw new Error("Server responded with " + res.status);
+      triggerToast("✅ Data synchronized with the AI Studio project codebase! You can now ask the AI agent to push to GitHub.");
+    } catch (err: any) {
+      alert("Error saving: " + err.message);
+    }
+  };
+
   // Blog Adder fields
   const [newBlogTitle, setNewBlogTitle] = useState('');
   const [newBlogExcerpt, setNewBlogExcerpt] = useState('');
@@ -819,6 +855,13 @@ export default function App() {
               {/* Customizer / Quick Action button - Secured for Owner Only */}
               {isOwner && isLocalEnvironment && (
                 <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={handleSyncToCodebase}
+                    title="Save Changes to Codebase"
+                    className="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl bg-orange-600/10 hover:bg-orange-600 text-orange-600 hover:text-white transition duration-200 border border-orange-600/20 shadow-sm"
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wider leading-none">Sync to Git</span>
+                  </button>
                   <button
                     id="customize-portfolio-btn"
                     onClick={() => {
