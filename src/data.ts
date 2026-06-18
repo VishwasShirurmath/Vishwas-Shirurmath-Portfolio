@@ -84,14 +84,13 @@ export const THEME_PRESETS: ThemePreset[] = [
 
 export const INITIAL_PROFILE: ProfileInfo = {
   "name": "Vishwas Shirurmath",
-  "role": "Software Engineering Graduate",
+  "role": "Aspiring Software Engineer",
   "subRole": "Aspiring DevSecOps, Cloud & System Design Engineer focused on building secure, scalable, and automated infrastructure. Passionate about cloud-native technologies, cybersecurity, and designing resilient distributed systems.",
   "email": "vishwasshirurmath123@gmail.com",
   "phone": "+91 94827 XXXXX",
   "location": "Mysore, India",
   "github": "https://github.com/vishwasshirurmath",
   "linkedin": "https://www.linkedin.com/in/vishwas-shirurmath",
-  "resume": "",
   "bio": "Driven by curiosity and obsessed with growth, I build secure, scalable, and automated solutions while continuously exploring the latest advancements in cloud, DevOps,System Design and cybersecurity.",
   "skills": [
     {
@@ -156,7 +155,8 @@ export const INITIAL_PROFILE: ProfileInfo = {
       "grade": "Grade: A",
       "description": ""
     }
-  ]
+  ],
+  "resume": "https://vishwasshirurmath.tiiny.site"
 };
 
 export const INITIAL_PROJECTS: ProjectEntry[] = [];
@@ -171,4 +171,17 @@ export const INITIAL_TRACKERS: ActivityTracker[] = [
   { id: 'track-5', name: 'Hydration Log', category: 'wellbeing', target: 8, current: 5, unit: 'cups of water', color: 'from-blue-400 to-sky-500' }
 ];
 
-export const INITIAL_EXPERIENCES: ExperienceEntry[] = [];
+export const INITIAL_EXPERIENCES: ExperienceEntry[] = [
+  {
+    "id": "exp-1781809501678",
+    "role": "Project Intern",
+    "company": "Defense Institute of Advanced Technology (DIAT), DRDO Pune",
+    "period": "MAY 2026 - JULY 2026",
+    "description": "Architected a decentralized Zero Trust Architecture (ZTA) for tactical edge environments using K3s,\nSPIFFE/SPIRE, Envoy Proxy, and Open Policy Agent (OPA), enabling secure identity-based communication\nand mutual TLS (mTLS) authentication without centralized cloud dependency.\n•\nEngineered a cloud-native observability platform leveraging FastAPI, PostgreSQL, React, Prometheus, and\nGrafana to monitor real-time network telemetry, security events, trust scores, and infrastructure health across\ndistributed environments.\n•\nImplemented policy-driven access control, local authorization caching, and dynamic security enforcement\nmechanisms, eliminating fail-open conditions and improving resilience during network disruptions and\ndisconnected operations.\n•\nContainerized and orchestrated microservices using Docker and Kubernetes, streamlining deployment workflows,\nimproving scalability, and enabling automated infrastructure monitoring and anomaly detection.\nDeveloped real-time threat detection and security monitoring capabilities by integrating telemetry analytics,\npolicy evaluation, and observability pipelines to identify suspicious network behavior and operational risks.",
+    "tech": [
+      "CLOUD",
+      "DEVOPS TOOLS",
+      "ZTA(ZERO-TRUST ARCHITECTURE)"
+    ]
+  }
+];
