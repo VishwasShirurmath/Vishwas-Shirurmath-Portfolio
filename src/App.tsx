@@ -42,7 +42,6 @@ import {
 } from 'lucide-react';
 import { THEME_PRESETS, INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_TRACKERS, INITIAL_EXPERIENCES } from './data';
 import { ThemePreset, ProfileInfo, ProjectEntry, BlogPost, ActiveTab, ExperienceEntry, SkillGroup, Education, ExtraCurricularEntry } from './types';
-import userSavedData from './user-data.json';
 import AntiGravityBackground from './components/AntiGravityBackground';
 import AnimatedIntro from './components/AnimatedIntro';
 import ThemeSelector from './components/ThemeSelector';
@@ -134,7 +133,7 @@ export default function App() {
       const found = THEME_PRESETS.find(p => p.id === savedThemeId);
       if (found) return found;
     }
-    const fallbackThemeId = userSavedData.themeId;
+    const fallbackThemeId = "wheat";
     if (fallbackThemeId) {
       const found = THEME_PRESETS.find(p => p.id === fallbackThemeId);
       if (found) return found;
@@ -184,22 +183,22 @@ export default function App() {
   const [spotlightProject, setSpotlightProject] = useState(() => {
     const saved = localStorage.getItem('owner_spotlight');
     if (saved) return JSON.parse(saved);
-    return userSavedData.spotlightProject || {
-      title: "Antigravity OS Framework",
-      description: "A comprehensive AI-driven task orchestration framework designed for single-view web environments. Built on modern modular paradigms.",
-      category: "SYSTEMS",
-      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop"
-    };
+    return {
+    "title": "Antigravity OS Framework",
+    "description": "A comprehensive AI-driven task orchestration framework designed for single-view web environments. Built on modern modular paradigms.",
+    "category": "SYSTEMS",
+    "imageUrl": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop"
+};
   });
 
   const [featuredBlog, setFeaturedBlog] = useState(() => {
     const saved = localStorage.getItem('owner_featured_blog');
     if (saved) return JSON.parse(saved);
-    return userSavedData.featuredBlog || {
-      title: "Rethinking Component Modular Architecture in 2026",
-      excerpt: "Analyzing the shift towards completely autonomous component islands.",
-      date: "OCT 14"
-    };
+    return {
+    "title": "Rethinking Component Modular Architecture in 2026",
+    "excerpt": "Analyzing the shift towards completely autonomous component islands.",
+    "date": "OCT 14"
+};
   });
 
   // Track currently selected blog to read full details (Modal)
@@ -212,7 +211,7 @@ export default function App() {
   // Animated Landing Page custom presets & editable variables
   const [introDuration, setIntroDuration] = useState<number>(() => {
     const saved = localStorage.getItem('portfolio_intro_duration');
-    return saved ? parseInt(saved, 10) : (userSavedData.introDuration || 3000);
+    return saved ? parseInt(saved, 10) : 3200;
   });
 
   const [introSteps, setIntroSteps] = useState<string[]>(() => {
@@ -220,17 +219,11 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return userSavedData.introSteps ? userSavedData.introSteps : [
-      'Calibrating inertial reference vectors...',
-      'Nullifying domestic gravity matrices...',
-      'Interlinking orbital connection meshes...',
-      'Aligning professional workspace maps...',
-      'Activating interactive portal... Completed!'
-    ];
+    return ["Aspiring DevSecOps, Cloud & System Design Engineer passionate about building secure, scalable, and automated infrastructure. I specialize in cloud-native technologies, infrastructure automation, container orchestration, observability, and cybersecurity, with a focus on designing resilient distributed systems for real-world environments."];
   });
 
   // Interactive Hero Headline
-  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || userSavedData.heroHeadline || 'Designing the next wave of software systems.');
+  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || "Designing the next wave of software systems." || 'Designing the next wave of software systems.');
 
   // Experience state
   const [experiences, setExperiences] = useState<ExperienceEntry[]>(() => {
@@ -242,9 +235,9 @@ export default function App() {
   });
 
   // Working focus states
-  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || userSavedData.workingCategory || 'Currently Working On');
-  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || userSavedData.workingTitle || 'Learning Java & Backend Systems');
-  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || userSavedData.workingDesc || 'Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.');
+  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || "Currently Working On" || 'Currently Working On');
+  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || "Learning Java & Backend Systems" || 'Learning Java & Backend Systems');
+  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || "Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures." || 'Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.');
 
   // DSA Sync Hub state variables
   const [showHeatmap, setShowHeatmap] = useState(() => localStorage.getItem('owner_show_heatmap') !== 'false');
@@ -252,56 +245,7 @@ export default function App() {
   const [dsaPlatforms, setDsaPlatforms] = useState<any[]>(() => {
     const saved = localStorage.getItem('owner_dsa_platforms_v2');
     if (saved) return JSON.parse(saved);
-    return userSavedData.dsaPlatforms ? userSavedData.dsaPlatforms : [
-      {
-        id: '1',
-        name: 'GeeksforGeeks',
-        shortName: 'GFG',
-        type: 'DSA Work & Practice',
-        colorTheme: 'emerald',
-        statusLabel: 'Verified Hub',
-        solved: parseInt(localStorage.getItem('owner_dsa_gfg_solved') || "342", 10),
-        target: 500,
-        extraLabel1: 'Coding Score:',
-        extraValue1: localStorage.getItem('owner_dsa_gfg_points') || "1,452 pts",
-        extraLabel2: 'Scraper Sync Connection',
-        extraValue2: 'Active',
-        profileUrl: localStorage.getItem('owner_dsa_gfg_profile') || "https://auth.geeksforgeeks.org/user/vishwasshirurmath123",
-        verifyUrl: localStorage.getItem('owner_dsa_gfg_verify') || "https://media.geeksforgeeks.org/certificates/vishwasshirurmath123"
-      },
-      {
-        id: '2',
-        name: 'Tough DSA',
-        shortName: 'T',
-        type: 'Competitive Coding',
-        colorTheme: 'amber',
-        statusLabel: 'Synced',
-        solved: parseInt(localStorage.getItem('owner_dsa_tough_solved') || "184", 10),
-        target: 300,
-        extraLabel1: 'Global Ranking:',
-        extraValue1: localStorage.getItem('owner_dsa_tough_rank') || "Global #1,240",
-        extraLabel2: 'Security Handshake',
-        extraValue2: 'Authenticated',
-        profileUrl: localStorage.getItem('owner_dsa_tough_profile') || "https://toughdsa.com/profile/vishwasshirurmath",
-        verifyUrl: localStorage.getItem('owner_dsa_tough_verify') || "https://toughdsa.com/verify/credentials/vishwasshirurmath"
-      },
-      {
-        id: '3',
-        name: 'LeetCode',
-        shortName: 'LC',
-        type: 'Algorithmic Grinds',
-        colorTheme: 'orange',
-        statusLabel: 'Daily Cached',
-        solved: parseInt(localStorage.getItem('owner_dsa_lc_solved') || "210", 10),
-        target: 400,
-        extraLabel1: 'Badge status:',
-        extraValue1: 'Active Streak',
-        extraLabel2: 'Credentials Key',
-        extraValue2: 'SHA-256 Valid',
-        profileUrl: localStorage.getItem('owner_dsa_lc_profile') || "https://leetcode.com/vishwasshirurmath123",
-        verifyUrl: localStorage.getItem('owner_dsa_lc_verify') || "https://leetcode.com/verify/vishwasshirurmath123"
-      }
-    ];
+    return [];
   });
 
   // Animation/Handshake UI Sync states
@@ -314,11 +258,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return userSavedData.learningAreas ? userSavedData.learningAreas : [
-      { domain: "Data Structures & Algorithms", platform: "GeeksforGeeks & Tough DSA", topics: "Graphs, Dynamic Programming, Bit Magic, Trees, Sorting, Math Optimization", duration: "18 Months Active" },
-      { domain: "Cloud Infrastructure & DevOps", platform: "Interactive Cloud Sandbox", topics: "Terraform Modules, AWS IAM Roles, Nginx Proxy tuning, Docker Multi-stage", duration: "12 Months Active" },
-      { domain: "Systems, Security & Networking", platform: "CyberSec Labs Audit", topics: "Falco deep logs, Wireshark packet capture, OWASP security, Linux system calls", duration: "8 Months Active" }
-    ];
+    return [];
   });
 
   // Extracurricular dynamic states
@@ -330,26 +270,26 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) { }
     }
-    return userSavedData.extracurriculars ? userSavedData.extracurriculars : [
-      {
-        id: "extra-1",
-        title: "DevOps Homelabbing",
-        role: "Independent Sandbox",
-        description: "Maintained localized private hypervisors and custom firewalls to simulate network isolation. Set up automated DNS configurations and continuous backup cron configurations."
-      },
-      {
-        id: "extra-2",
-        title: "Tech Club Organizing",
-        role: "Volunteer Coordinator",
-        description: "Actively coordinated college tech symposia and mock Capture-the-Flag cybersecurity competitions. Drafted continuous evaluation systems and provisioned score monitoring servers."
-      },
-      {
-        id: "extra-3",
-        title: "Academic Lab Deployments",
-        role: "Department Support",
-        description: "Assisted lab administrators by writing bash and python scripts to automate environment resets on terminal workstations, shrinking configuration drifts across 60+ hosts."
-      }
-    ];
+    return [
+    {
+        "id": "extra-1",
+        "title": "Tvar - Linux Project  ",
+        "role": "Founder",
+        "description": "Building a Linux based Operating System for Indian users"
+    },
+    {
+        "id": "extra-2",
+        "title": "Mozilla FireFox Club",
+        "role": "Senior Tech Lead ",
+        "description": "Spearheaded technical events, workshops, and community-driven initiatives, mentoring students in modern technologies and industry best practices. Strengthened the club's technical ecosystem by promoting open-source contributions, collaborative learning, and hands-on project development."
+    },
+    {
+        "id": "extra-3",
+        "title": "Cultural and Sports ",
+        "role": "Sports Lead(Cricker)/Cultural Fest Volunteer(Advitya 2024 and 2025)",
+        "description": "Contributed to the successful execution of Advitya, VIT Bhopal's annual cultural fest, by coordinating event logistics, managing participant engagement, and supporting on-ground operations. Collaborated with cross-functional teams to ensure smooth event execution and an engaging experience for attendees.\nDirected cricket tournaments and sports activities, overseeing team coordination, match scheduling, and event logistics. Enhanced participant engagement and ensured efficient execution of university-level sporting events."
+    }
+];
   });
 
   // Extracurricular Adder fields
