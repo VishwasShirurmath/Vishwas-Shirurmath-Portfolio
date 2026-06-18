@@ -126,7 +126,7 @@ export const INITIAL_PROFILE: ProfileInfo = userSavedData.profile || {
   ]
 };
 
-export const INITIAL_PROJECTS: ProjectEntry[] = userSavedData.projects?.length ? userSavedData.projects : [
+export const INITIAL_PROJECTS: ProjectEntry[] = userSavedData.projects ? userSavedData.projects : [
   {
     id: "proj-1",
     title: "Anti-Gravity Cloud Network Mesh Simulator",
@@ -166,7 +166,7 @@ export const INITIAL_PROJECTS: ProjectEntry[] = userSavedData.projects?.length ?
   }
 ] as unknown as ProjectEntry[];
 
-export const INITIAL_BLOGS: BlogPost[] = userSavedData.blogs?.length ? userSavedData.blogs : [
+export const INITIAL_BLOGS: BlogPost[] = userSavedData.blogs ? userSavedData.blogs : [
   {
     id: "blog-1",
     title: "Architecting Resilient Services: Navigating Multi-Region Active-Active Cloud Networks",
@@ -254,7 +254,7 @@ export const INITIAL_TRACKERS: ActivityTracker[] = [
   { id: 'track-5', name: 'Hydration Log', category: 'wellbeing', target: 8, current: 5, unit: 'cups of water', color: 'from-blue-400 to-sky-500' }
 ];
 
-export const INITIAL_EXPERIENCES: ExperienceEntry[] = userSavedData.experiences?.length ? userSavedData.experiences : [
+export const INITIAL_EXPERIENCES: ExperienceEntry[] = userSavedData.experiences ? userSavedData.experiences : [
   {
     id: "exp-1",
     role: "DevOps & Cloud Systems Intern",

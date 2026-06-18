@@ -134,6 +134,11 @@ export default function App() {
       const found = THEME_PRESETS.find(p => p.id === savedThemeId);
       if (found) return found;
     }
+    const fallbackThemeId = userSavedData.themeId;
+    if (fallbackThemeId) {
+      const found = THEME_PRESETS.find(p => p.id === fallbackThemeId);
+      if (found) return found;
+    }
     return THEME_PRESETS[0]; // Warm Sandstone
   });
 
@@ -215,7 +220,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return userSavedData.introSteps?.length ? userSavedData.introSteps : [
+    return userSavedData.introSteps ? userSavedData.introSteps : [
       'Calibrating inertial reference vectors...',
       'Nullifying domestic gravity matrices...',
       'Interlinking orbital connection meshes...',
@@ -247,7 +252,7 @@ export default function App() {
   const [dsaPlatforms, setDsaPlatforms] = useState<any[]>(() => {
     const saved = localStorage.getItem('owner_dsa_platforms_v2');
     if (saved) return JSON.parse(saved);
-    return userSavedData.dsaPlatforms?.length ? userSavedData.dsaPlatforms : [
+    return userSavedData.dsaPlatforms ? userSavedData.dsaPlatforms : [
       {
         id: '1',
         name: 'GeeksforGeeks',
@@ -309,7 +314,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return userSavedData.learningAreas?.length ? userSavedData.learningAreas : [
+    return userSavedData.learningAreas ? userSavedData.learningAreas : [
       { domain: "Data Structures & Algorithms", platform: "GeeksforGeeks & Tough DSA", topics: "Graphs, Dynamic Programming, Bit Magic, Trees, Sorting, Math Optimization", duration: "18 Months Active" },
       { domain: "Cloud Infrastructure & DevOps", platform: "Interactive Cloud Sandbox", topics: "Terraform Modules, AWS IAM Roles, Nginx Proxy tuning, Docker Multi-stage", duration: "12 Months Active" },
       { domain: "Systems, Security & Networking", platform: "CyberSec Labs Audit", topics: "Falco deep logs, Wireshark packet capture, OWASP security, Linux system calls", duration: "8 Months Active" }
@@ -325,7 +330,7 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) { }
     }
-    return userSavedData.extracurriculars?.length ? userSavedData.extracurriculars : [
+    return userSavedData.extracurriculars ? userSavedData.extracurriculars : [
       {
         id: "extra-1",
         title: "DevOps Homelabbing",
