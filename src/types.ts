@@ -70,7 +70,7 @@ export interface ProfileInfo {
   location: string;
   github: string;
   linkedin: string;
-  twitter: string;
+  resume: string;
   bio: string;
   skills: SkillGroup[];
   education: Education[];

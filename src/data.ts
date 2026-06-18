@@ -91,7 +91,7 @@ export const INITIAL_PROFILE: ProfileInfo = {
   "location": "Mysore, India",
   "github": "https://github.com/vishwasshirurmath",
   "linkedin": "https://www.linkedin.com/in/vishwas-shirurmath",
-  "twitter": "https://twitter.com/vishwass_codes",
+  "resume": "",
   "bio": "Driven by curiosity and obsessed with growth, I build secure, scalable, and automated solutions while continuously exploring the latest advancements in cloud, DevOps,System Design and cybersecurity.",
   "skills": [
     {

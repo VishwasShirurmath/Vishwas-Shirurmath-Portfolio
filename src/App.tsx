@@ -9,7 +9,6 @@ import {
   Plus,
   Github,
   Linkedin,
-  Twitter,
   Mail,
   MapPin,
   ExternalLink,
@@ -306,7 +305,7 @@ export default function App() {
   const [editBio, setEditBio] = useState(profile.bio);
   const [editGithub, setEditGithub] = useState(profile.github);
   const [editLinkedin, setEditLinkedin] = useState(profile.linkedin);
-  const [editTwitter, setEditTwitter] = useState(profile.twitter);
+  const [editResume, setEditResume] = useState(profile.resume);
 
   // Skills custom matrix dynamics
   const [editSkills, setEditSkills] = useState<SkillGroup[]>(() => profile.skills || []);
@@ -505,7 +504,7 @@ export default function App() {
     setEditBio(profile.bio);
     setEditGithub(profile.github);
     setEditLinkedin(profile.linkedin);
-    setEditTwitter(profile.twitter);
+    setEditResume(profile.resume);
   }, [profile]);
 
   // Handle Profile Update Save
@@ -521,7 +520,7 @@ export default function App() {
       bio: editBio,
       github: editGithub,
       linkedin: editLinkedin,
-      twitter: editTwitter,
+      resume: editResume,
       skills: editSkills
     }));
     triggerToast("Your professional profile has been hot-swapped!");
@@ -901,13 +900,13 @@ export default function App() {
                       </p>
 
                       {/* Micro Contact Pills */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                        <div className={`flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-600'} p-3 rounded-xl border text-sm font-mono`}>
-                          <Mail className="h-4 w-4 text-amber-600 dark:text-amber-500" />
-                          <span className="truncate" title={profile.email}>{profile.email}</span>
-                        </div>
-                        <div className={`flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-600'} p-3 rounded-xl border text-sm font-mono`}>
-                          <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+                      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                        <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300 hover:text-white hover:border-amber-500/30' : 'bg-stone-50 border-stone-200 text-stone-600 hover:text-stone-900 hover:border-amber-500/30'} p-3 rounded-xl border text-sm font-mono transition-colors group`}>
+                          <Mail className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />
+                          <span className="break-all" title={profile.email}>{profile.email}</span>
+                        </a>
+                        <div className={`flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-600'} p-3 rounded-xl border text-sm font-mono whitespace-nowrap`}>
+                          <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0" />
                           <span className="truncate">{profile.location}</span>
                         </div>
                       </div>
@@ -936,15 +935,15 @@ export default function App() {
                             <span>LinkedIn</span>
                           </a>
                         )}
-                        {profile.twitter && (
+                        {profile.resume && (
                           <a
-                            href={profile.twitter}
+                            href={profile.resume}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-4 py-2.5 bg-stone-50 hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-300 rounded-xl text-sm font-mono transition border border-stone-200 dark:border-stone-800 font-medium"
                           >
-                            <Twitter className="h-4 w-4" />
-                            <span>Twitter</span>
+                            <FileText className="h-4 w-4" />
+                            <span>Resume</span>
                           </a>
                         )}
                       </div>
@@ -2206,7 +2205,18 @@ export default function App() {
                         type="url"
                         value={editLinkedin}
                         onChange={(e) => setEditLinkedin(e.target.value)}
-                        className="w-full text-xs font-mono border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50"
+                        className="w-full text-xs font-mono border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 md:bg-stone-50/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Resume / CV Link</label>
+                      <input
+                        type="url"
+                        value={editResume || ''}
+                        onChange={(e) => setEditResume(e.target.value)}
+                        placeholder="https://link-to-your-resume.pdf"
+                        className="w-full text-xs font-mono border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 md:bg-stone-50/50"
                       />
                     </div>
 

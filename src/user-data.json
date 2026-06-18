@@ -1,1 +1,123 @@
-{}
+{
+  "profile": {
+    "name": "Vishwas Shirurmath",
+    "role": "Software Engineering Graduate",
+    "subRole": "Aspiring DevSecOps, Cloud & System Design Engineer focused on building secure, scalable, and automated infrastructure. Passionate about cloud-native technologies, cybersecurity, and designing resilient distributed systems.",
+    "email": "vishwasshirurmath123@gmail.com",
+    "phone": "+91 94827 XXXXX",
+    "location": "Mysore, India",
+    "github": "https://github.com/vishwasshirurmath",
+    "linkedin": "https://www.linkedin.com/in/vishwas-shirurmath",
+    "resume": "",
+    "bio": "Driven by curiosity and obsessed with growth, I build secure, scalable, and automated solutions while continuously exploring the latest advancements in cloud, DevOps,System Design and cybersecurity.",
+    "skills": [
+      {
+        "category": "Cloud & Infrastructure",
+        "items": [
+          "AWS",
+          "Cloud Architecture",
+          "Virtual Private Cloud (VPC)",
+          "EC2",
+          "S3",
+          "IAM",
+          "Cloud Security",
+          "Infrastructure as Code (Terraform)"
+        ]
+      },
+      {
+        "category": "Backend & Systems Engineering",
+        "items": [
+          "Python",
+          "FastAPI",
+          "REST APIs",
+          "PostgreSQL",
+          "MongoDB",
+          "Distributed Systems",
+          "Microservices Architecture",
+          "System Design"
+        ]
+      },
+      {
+        "category": "DevOps Tools",
+        "items": [
+          "Docker",
+          "Kubernetes",
+          "CI/CD Pipelines",
+          "GitHub Actions",
+          "Terraform",
+          "Linux Administration",
+          "Bash Scripting",
+          "Platform Automation",
+          "Prometheus",
+          "Grafana",
+          "ELK Stack",
+          "Log Management",
+          "Metrics Monitoring",
+          "Alerting Systems",
+          "Performance Optimization."
+        ]
+      }
+    ],
+    "education": [
+      {
+        "degree": "Bachelor of Engineering in Computer Science & Engineering(Cyber Security and Digital Forensics)",
+        "institution": "Vellore Institue of Technology,Bhopal University",
+        "period": "2023-2027",
+        "grade": "Grade: B",
+        "description": ""
+      },
+      {
+        "degree": "Pre-University College (Science & PCMC)",
+        "institution": "Sankalpa Pu College",
+        "period": "2021 - 2023",
+        "grade": "Grade: A",
+        "description": ""
+      }
+    ]
+  },
+  "projects": [],
+  "blogs": [],
+  "dsaPlatforms": [],
+  "learningAreas": [],
+  "extracurriculars": [
+    {
+      "id": "extra-1",
+      "title": "Tvar - Linux Project  ",
+      "role": "Founder",
+      "description": "Building a Linux based Operating System for Indian users"
+    },
+    {
+      "id": "extra-2",
+      "title": "Mozilla FireFox Club",
+      "role": "Senior Tech Lead ",
+      "description": "Spearheaded technical events, workshops, and community-driven initiatives, mentoring students in modern technologies and industry best practices. Strengthened the club's technical ecosystem by promoting open-source contributions, collaborative learning, and hands-on project development."
+    },
+    {
+      "id": "extra-3",
+      "title": "Cultural and Sports ",
+      "role": "Sports Lead(Cricker)/Cultural Fest Volunteer(Advitya 2024 and 2025)",
+      "description": "Contributed to the successful execution of Advitya, VIT Bhopal's annual cultural fest, by coordinating event logistics, managing participant engagement, and supporting on-ground operations. Collaborated with cross-functional teams to ensure smooth event execution and an engaging experience for attendees.\nDirected cricket tournaments and sports activities, overseeing team coordination, match scheduling, and event logistics. Enhanced participant engagement and ensured efficient execution of university-level sporting events."
+    }
+  ],
+  "experiences": [],
+  "spotlightProject": {
+    "title": "Antigravity OS Framework",
+    "description": "A comprehensive AI-driven task orchestration framework designed for single-view web environments. Built on modern modular paradigms.",
+    "category": "SYSTEMS",
+    "imageUrl": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop"
+  },
+  "featuredBlog": {
+    "title": "Rethinking Component Modular Architecture in 2026",
+    "excerpt": "Analyzing the shift towards completely autonomous component islands.",
+    "date": "OCT 14"
+  },
+  "heroHeadline": "Designing the next wave of software systems.",
+  "introDuration": 3200,
+  "introSteps": [
+    "Aspiring DevSecOps, Cloud & System Design Engineer passionate about building secure, scalable, and automated infrastructure. I specialize in cloud-native technologies, infrastructure automation, container orchestration, observability, and cybersecurity, with a focus on designing resilient distributed systems for real-world environments."
+  ],
+  "workingCategory": "Currently Working On",
+  "workingTitle": "Learning Java & Backend Systems",
+  "workingDesc": "Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.",
+  "themeId": "wheat"
+}
