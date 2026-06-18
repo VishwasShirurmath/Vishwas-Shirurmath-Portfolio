@@ -1,0 +1,6 @@
+{
+  "name": "Vishwas Shiroor Mat Portfolio",
+  "description": "An interactive engineering fresher's portfolio featuring a live anti-gravity background, a 2-3s animated loading landing page, multiple warm theme styles, and fully active daily activity trackers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
