@@ -81,7 +81,9 @@ export const THEME_PRESETS: ThemePreset[] = [
   }
 ];
 
-export const INITIAL_PROFILE: ProfileInfo = {
+import userSavedData from './user-data.json';
+
+export const INITIAL_PROFILE: ProfileInfo = userSavedData.profile || {
   name: "Vishwas Shiroor Mat",
   role: "DevOps & Cloud Systems Engineer",
   subRole: "Specializing in Cloud Infrastructure Orchestration, Resilient Systems Design, and Cybersecurity Hardening",
@@ -124,7 +126,7 @@ export const INITIAL_PROFILE: ProfileInfo = {
   ]
 };
 
-export const INITIAL_PROJECTS: ProjectEntry[] = [
+export const INITIAL_PROJECTS: ProjectEntry[] = userSavedData.projects?.length ? userSavedData.projects : [
   {
     id: "proj-1",
     title: "Anti-Gravity Cloud Network Mesh Simulator",
@@ -164,7 +166,7 @@ export const INITIAL_PROJECTS: ProjectEntry[] = [
   }
 ] as unknown as ProjectEntry[];
 
-export const INITIAL_BLOGS: BlogPost[] = [
+export const INITIAL_BLOGS: BlogPost[] = userSavedData.blogs?.length ? userSavedData.blogs : [
   {
     id: "blog-1",
     title: "Architecting Resilient Services: Navigating Multi-Region Active-Active Cloud Networks",
@@ -252,7 +254,7 @@ export const INITIAL_TRACKERS: ActivityTracker[] = [
   { id: 'track-5', name: 'Hydration Log', category: 'wellbeing', target: 8, current: 5, unit: 'cups of water', color: 'from-blue-400 to-sky-500' }
 ];
 
-export const INITIAL_EXPERIENCES: ExperienceEntry[] = [
+export const INITIAL_EXPERIENCES: ExperienceEntry[] = userSavedData.experiences?.length ? userSavedData.experiences : [
   {
     id: "exp-1",
     role: "DevOps & Cloud Systems Intern",

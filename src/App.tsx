@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { THEME_PRESETS, INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_TRACKERS, INITIAL_EXPERIENCES } from './data';
 import { ThemePreset, ProfileInfo, ProjectEntry, BlogPost, ActiveTab, ExperienceEntry, SkillGroup, Education, ExtraCurricularEntry } from './types';
+import userSavedData from './user-data.json';
 import AntiGravityBackground from './components/AntiGravityBackground';
 import AnimatedIntro from './components/AnimatedIntro';
 import ThemeSelector from './components/ThemeSelector';
@@ -178,7 +179,7 @@ export default function App() {
   const [spotlightProject, setSpotlightProject] = useState(() => {
     const saved = localStorage.getItem('owner_spotlight');
     if (saved) return JSON.parse(saved);
-    return {
+    return userSavedData.spotlightProject || {
       title: "Antigravity OS Framework",
       description: "A comprehensive AI-driven task orchestration framework designed for single-view web environments. Built on modern modular paradigms.",
       category: "SYSTEMS",
@@ -189,7 +190,7 @@ export default function App() {
   const [featuredBlog, setFeaturedBlog] = useState(() => {
     const saved = localStorage.getItem('owner_featured_blog');
     if (saved) return JSON.parse(saved);
-    return {
+    return userSavedData.featuredBlog || {
       title: "Rethinking Component Modular Architecture in 2026",
       excerpt: "Analyzing the shift towards completely autonomous component islands.",
       date: "OCT 14"
@@ -206,7 +207,7 @@ export default function App() {
   // Animated Landing Page custom presets & editable variables
   const [introDuration, setIntroDuration] = useState<number>(() => {
     const saved = localStorage.getItem('portfolio_intro_duration');
-    return saved ? parseInt(saved, 10) : 3000;
+    return saved ? parseInt(saved, 10) : (userSavedData.introDuration || 3000);
   });
 
   const [introSteps, setIntroSteps] = useState<string[]>(() => {
@@ -214,7 +215,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return [
+    return userSavedData.introSteps?.length ? userSavedData.introSteps : [
       'Calibrating inertial reference vectors...',
       'Nullifying domestic gravity matrices...',
       'Interlinking orbital connection meshes...',
@@ -224,7 +225,7 @@ export default function App() {
   });
 
   // Interactive Hero Headline
-  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || 'Designing the next wave of software systems.');
+  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || userSavedData.heroHeadline || 'Designing the next wave of software systems.');
 
   // Experience state
   const [experiences, setExperiences] = useState<ExperienceEntry[]>(() => {
@@ -236,9 +237,9 @@ export default function App() {
   });
 
   // Working focus states
-  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || 'Currently Working On');
-  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || 'Learning Java & Backend Systems');
-  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || 'Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.');
+  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || userSavedData.workingCategory || 'Currently Working On');
+  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || userSavedData.workingTitle || 'Learning Java & Backend Systems');
+  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || userSavedData.workingDesc || 'Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.');
 
   // DSA Sync Hub state variables
   const [showHeatmap, setShowHeatmap] = useState(() => localStorage.getItem('owner_show_heatmap') !== 'false');
@@ -246,7 +247,7 @@ export default function App() {
   const [dsaPlatforms, setDsaPlatforms] = useState<any[]>(() => {
     const saved = localStorage.getItem('owner_dsa_platforms_v2');
     if (saved) return JSON.parse(saved);
-    return [
+    return userSavedData.dsaPlatforms?.length ? userSavedData.dsaPlatforms : [
       {
         id: '1',
         name: 'GeeksforGeeks',
@@ -308,7 +309,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return [
+    return userSavedData.learningAreas?.length ? userSavedData.learningAreas : [
       { domain: "Data Structures & Algorithms", platform: "GeeksforGeeks & Tough DSA", topics: "Graphs, Dynamic Programming, Bit Magic, Trees, Sorting, Math Optimization", duration: "18 Months Active" },
       { domain: "Cloud Infrastructure & DevOps", platform: "Interactive Cloud Sandbox", topics: "Terraform Modules, AWS IAM Roles, Nginx Proxy tuning, Docker Multi-stage", duration: "12 Months Active" },
       { domain: "Systems, Security & Networking", platform: "CyberSec Labs Audit", topics: "Falco deep logs, Wireshark packet capture, OWASP security, Linux system calls", duration: "8 Months Active" }
@@ -324,7 +325,7 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) { }
     }
-    return [
+    return userSavedData.extracurriculars?.length ? userSavedData.extracurriculars : [
       {
         id: "extra-1",
         title: "DevOps Homelabbing",
