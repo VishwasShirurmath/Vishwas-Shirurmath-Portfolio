@@ -38,9 +38,7 @@ import {
   Activity,
   Layout,
   PenTool,
-  Clock,
-  User,
-  Briefcase
+  Clock
 } from 'lucide-react';
 import { THEME_PRESETS, INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_TRACKERS, INITIAL_EXPERIENCES } from './data';
 import { ThemePreset, ProfileInfo, ProjectEntry, BlogPost, ActiveTab, ExperienceEntry, SkillGroup, Education, ExtraCurricularEntry } from './types';
