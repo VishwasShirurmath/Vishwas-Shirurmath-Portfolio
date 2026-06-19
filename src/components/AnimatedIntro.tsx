@@ -204,16 +204,6 @@ export default function AnimatedIntro({
                 </AnimatePresence>
               </div>
             </motion.div>
-
-            {/* Subtle Tagline */}
-            <motion.p 
-              className="mt-8 text-[11px] font-mono tracking-widest text-stone-600 uppercase"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 1 }}
-            >
-              Warm Antigravity UI Engine v2.0
-            </motion.p>
           </div>
         </motion.div>
       )}

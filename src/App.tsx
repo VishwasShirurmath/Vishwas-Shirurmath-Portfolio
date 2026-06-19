@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent, MouseEvent } from 'react';
+import React, { useState, useEffect, useRef, FormEvent, MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   User,
@@ -13,6 +13,8 @@ import {
   MapPin,
   ExternalLink,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Sparkles,
   Info,
   CheckCircle,
@@ -39,11 +41,12 @@ import {
   PenTool,
   Clock
 } from 'lucide-react';
-import { THEME_PRESETS, INITIAL_PROFILE, INITIAL_PROJECTS, INITIAL_BLOGS, INITIAL_TRACKERS, INITIAL_EXPERIENCES } from './data';
+import { THEME_PRESETS } from './data';
 import { ThemePreset, ProfileInfo, ProjectEntry, BlogPost, ActiveTab, ExperienceEntry, SkillGroup, Education, ExtraCurricularEntry } from './types';
 import AntiGravityBackground from './components/AntiGravityBackground';
 import AnimatedIntro from './components/AnimatedIntro';
 import ThemeSelector from './components/ThemeSelector';
+import USER_DATA from './user-data.json';
 
 const getTheme = (presetId: string, basePreset: ThemePreset, isDark: boolean): ThemePreset => {
   if (!isDark) return basePreset;
@@ -132,7 +135,7 @@ export default function App() {
       const found = THEME_PRESETS.find(p => p.id === savedThemeId);
       if (found) return found;
     }
-    const fallbackThemeId = "wheat";
+    const fallbackThemeId = USER_DATA.themeId || "wheat";
     if (fallbackThemeId) {
       const found = THEME_PRESETS.find(p => p.id === fallbackThemeId);
       if (found) return found;
@@ -155,62 +158,61 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
 
   // Master local storage portfolio data sets
+  // Use USER_DATA as ultimate fallback instead of INITIAL_PROFILE
   const [profile, setProfile] = useState<ProfileInfo>(() => {
     const saved = localStorage.getItem('portfolio_profile');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return INITIAL_PROFILE; }
+      try { return JSON.parse(saved); } catch (e) { return USER_DATA.profile; }
     }
-    return INITIAL_PROFILE;
+    return USER_DATA.profile;
   });
 
   const [projects, setProjects] = useState<ProjectEntry[]>(() => {
     const saved = localStorage.getItem('portfolio_projects');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return INITIAL_PROJECTS; }
+      try { return JSON.parse(saved); } catch (e) { return USER_DATA.projects || []; }
     }
-    return INITIAL_PROJECTS;
+    return USER_DATA.projects || [];
   });
 
   const [blogs, setBlogs] = useState<BlogPost[]>(() => {
     const saved = localStorage.getItem('portfolio_blogs');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return INITIAL_BLOGS; }
+      try { return JSON.parse(saved); } catch (e) { return USER_DATA.blogs || []; }
     }
-    return INITIAL_BLOGS;
+    return USER_DATA.blogs || [];
   });
 
   const [spotlightProject, setSpotlightProject] = useState(() => {
     const saved = localStorage.getItem('owner_spotlight');
     if (saved) return JSON.parse(saved);
-    return {
-    "title": "Antigravity OS Framework",
-    "description": "A comprehensive AI-driven task orchestration framework designed for single-view web environments. Built on modern modular paradigms.",
-    "category": "SYSTEMS",
-    "imageUrl": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop"
-};
+    return USER_DATA.spotlightProject;
   });
 
   const [featuredBlog, setFeaturedBlog] = useState(() => {
     const saved = localStorage.getItem('owner_featured_blog');
     if (saved) return JSON.parse(saved);
-    return {
-    "title": "Rethinking Component Modular Architecture in 2026",
-    "excerpt": "Analyzing the shift towards completely autonomous component islands.",
-    "date": "OCT 14"
-};
+    return USER_DATA.featuredBlog;
   });
 
   // Track currently selected blog to read full details (Modal)
   const [readingBlog, setReadingBlog] = useState<BlogPost | null>(null);
 
+  const handleOpenBlog = (blog: BlogPost) => {
+    setReadingBlog(blog);
+    if (blog.id !== 'spotlight-article') {
+      setBlogs(prev => prev.map(b => b.id === blog.id ? { ...b, views: (b.views || 0) + 1 } : b));
+    }
+  };
+
   // Manage Creator Forms (Adding new content right in the client)
-  const setShowConfigModal = (v: boolean) => { if (v) setActiveTab('crm'); };
+  const [showConfigModal, setShowConfigModal] = useState(false);
   const [activeConfigSection, setActiveConfigSection] = useState<'info' | 'working' | 'education' | 'elementary' | 'extracurricular' | 'experience' | 'projects' | 'blogs' | 'landing' | 'spotlight'>('info');
 
   // Animated Landing Page custom presets & editable variables
   const [introDuration, setIntroDuration] = useState<number>(() => {
     const saved = localStorage.getItem('portfolio_intro_duration');
-    return saved ? parseInt(saved, 10) : 3200;
+    return saved ? parseInt(saved, 10) : (USER_DATA.introDuration || 3200);
   });
 
   const [introSteps, setIntroSteps] = useState<string[]>(() => {
@@ -218,25 +220,25 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return ["Aspiring DevSecOps, Cloud & System Design Engineer passionate about building secure, scalable, and automated infrastructure. I specialize in cloud-native technologies, infrastructure automation, container orchestration, observability, and cybersecurity, with a focus on designing resilient distributed systems for real-world environments."];
+    return USER_DATA.introSteps || [];
   });
 
   // Interactive Hero Headline
-  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || "Designing the next wave of software systems." || 'Designing the next wave of software systems.');
+  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || USER_DATA.heroHeadline || "Designing the next wave of software systems.");
 
   // Experience state
   const [experiences, setExperiences] = useState<ExperienceEntry[]>(() => {
     const saved = localStorage.getItem('portfolio_experiences');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return INITIAL_EXPERIENCES; }
+      try { return JSON.parse(saved); } catch (e) { return USER_DATA.experiences || []; }
     }
-    return INITIAL_EXPERIENCES;
+    return USER_DATA.experiences || [];
   });
 
   // Working focus states
-  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || "Currently Working On" || 'Currently Working On');
-  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || "Learning Java & Backend Systems" || 'Learning Java & Backend Systems');
-  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || "Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures." || 'Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.');
+  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || USER_DATA.workingCategory || "Currently Working On");
+  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || USER_DATA.workingTitle || "Learning.");
+  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || USER_DATA.workingDesc || "Deep diving into concepts.");
 
   // DSA Sync Hub state variables
   const [showHeatmap, setShowHeatmap] = useState(() => localStorage.getItem('owner_show_heatmap') !== 'false');
@@ -244,7 +246,7 @@ export default function App() {
   const [dsaPlatforms, setDsaPlatforms] = useState<any[]>(() => {
     const saved = localStorage.getItem('owner_dsa_platforms_v2');
     if (saved) return JSON.parse(saved);
-    return [];
+    return USER_DATA.dsaPlatforms || [];
   });
 
   // Animation/Handshake UI Sync states
@@ -257,7 +259,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { }
     }
-    return [];
+    return USER_DATA.learningAreas || [];
   });
 
   // Extracurricular dynamic states
@@ -269,26 +271,7 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) { }
     }
-    return [
-    {
-        "id": "extra-1",
-        "title": "Tvar - Linux Project  ",
-        "role": "Founder",
-        "description": "Building a Linux based Operating System for Indian users"
-    },
-    {
-        "id": "extra-2",
-        "title": "Mozilla FireFox Club",
-        "role": "Senior Tech Lead ",
-        "description": "Spearheaded technical events, workshops, and community-driven initiatives, mentoring students in modern technologies and industry best practices. Strengthened the club's technical ecosystem by promoting open-source contributions, collaborative learning, and hands-on project development."
-    },
-    {
-        "id": "extra-3",
-        "title": "Cultural and Sports ",
-        "role": "Sports Lead(Cricker)/Cultural Fest Volunteer(Advitya 2024 and 2025)",
-        "description": "Contributed to the successful execution of Advitya, VIT Bhopal's annual cultural fest, by coordinating event logistics, managing participant engagement, and supporting on-ground operations. Collaborated with cross-functional teams to ensure smooth event execution and an engaging experience for attendees.\nDirected cricket tournaments and sports activities, overseeing team coordination, match scheduling, and event logistics. Enhanced participant engagement and ensured efficient execution of university-level sporting events."
-    }
-];
+    return USER_DATA.extracurriculars || [];
   });
 
   // Extracurricular Adder fields
@@ -306,6 +289,7 @@ export default function App() {
   const [editGithub, setEditGithub] = useState(profile.github);
   const [editLinkedin, setEditLinkedin] = useState(profile.linkedin);
   const [editResume, setEditResume] = useState(profile.resume);
+  const [editAvailability, setEditAvailability] = useState(profile.availability || '🟢 Open to work');
 
   // Skills custom matrix dynamics
   const [editSkills, setEditSkills] = useState<SkillGroup[]>(() => profile.skills || []);
@@ -317,18 +301,19 @@ export default function App() {
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [newProjTitle, setNewProjTitle] = useState('');
   const [newProjTagline, setNewProjTagline] = useState('');
-  const [newProjDesc, setNewProjDesc] = useState('');
+  const [newProjDesc, setNewProjDesc] = useState<string[]>(['']);
   const [newProjLongDesc, setNewProjLongDesc] = useState('');
   const [newProjTech, setNewProjTech] = useState('');
   const [newProjGithub, setNewProjGithub] = useState('');
   const [newProjDemo, setNewProjDemo] = useState('');
-  const [newProjCategory, setNewProjCategory] = useState<'Cloud' | 'Security' | 'Systems'>('Cloud');
+  const [newProjCategory, setNewProjCategory] = useState('Cloud');
 
   // Experience Adder fields
+  const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
   const [newExpRole, setNewExpRole] = useState('');
   const [newExpCompany, setNewExpCompany] = useState('');
   const [newExpPeriod, setNewExpPeriod] = useState('');
-  const [newExpDesc, setNewExpDesc] = useState('');
+  const [newExpDesc, setNewExpDesc] = useState<string[]>(['']);
   const [newExpTech, setNewExpTech] = useState('');
 
   // Custom Overlay Confirmation state & gatekeeper (Bypasses browser context blockers)
@@ -433,14 +418,17 @@ export default function App() {
   };
 
   // Blog Adder fields
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
   const [newBlogTitle, setNewBlogTitle] = useState('');
   const [newBlogExcerpt, setNewBlogExcerpt] = useState('');
   const [newBlogContent, setNewBlogContent] = useState('');
   const [newBlogCategory, setNewBlogCategory] = useState('');
   const [newBlogReadTime, setNewBlogReadTime] = useState('4 min read');
+  const [newBlogIsSpotlight, setNewBlogIsSpotlight] = useState(false);
 
   // Notification Banner triggers
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [emailCopiedLocal, setEmailCopiedLocal] = useState(false);
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -497,7 +485,71 @@ export default function App() {
     localStorage.setItem('portfolio_intro_steps', JSON.stringify(introSteps));
   }, [introSteps]);
 
-  // Sync form state when profile changes
+  // Sync changes to the codebase file (only works within AI Studio dev environment via Vite middleware)
+  useEffect(() => {
+    if (!isLocalEnvironment) return; // limit just in case
+    
+    const timer = setTimeout(() => {
+      fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile,
+          projects,
+          blogs,
+          dsaPlatforms,
+          learningAreas,
+          extracurriculars,
+          experiences,
+          spotlightProject,
+          featuredBlog,
+          heroHeadline,
+          introDuration,
+          introSteps,
+          workingCategory,
+          workingTitle,
+          workingDesc,
+          themeId: activeTheme.id
+        })
+      }).catch(err => {
+        // fail silently for network errors
+      });
+    }, 1500); // debounce by 1.5s
+    
+    return () => clearTimeout(timer);
+  }, [profile, projects, blogs, dsaPlatforms, learningAreas, extracurriculars, experiences, spotlightProject, featuredBlog, heroHeadline, introDuration, introSteps, workingCategory, workingTitle, workingDesc, activeTheme.id, isLocalEnvironment]);
+
+    // Smooth Horizontal Scroll Matrix
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Use intersection observer to detect active tab silently
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          setActiveTab(entry.target.id as ActiveTab);
+        }
+      });
+    }, { threshold: 0.5, root: container });
+
+    const sections = ['home', 'about', 'projects', 'blogs', 'activity', 'extracurricular'];
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+
+
+
+// Sync form state when profile changes
   useEffect(() => {
     setEditName(profile.name);
     setEditRole(profile.role);
@@ -508,6 +560,7 @@ export default function App() {
     setEditGithub(profile.github);
     setEditLinkedin(profile.linkedin);
     setEditResume(profile.resume);
+    setEditAvailability(profile.availability || '🟢 Open to work');
   }, [profile]);
 
   // Handle Profile Update Save
@@ -524,6 +577,7 @@ export default function App() {
       github: editGithub,
       linkedin: editLinkedin,
       resume: editResume,
+      availability: editAvailability,
       skills: editSkills
     }));
     triggerToast("Your professional profile has been hot-swapped!");
@@ -542,8 +596,9 @@ export default function App() {
   // Handle Project Form Submission
   const addProject = (e: FormEvent) => {
     e.preventDefault();
-    if (!newProjTitle || !newProjDesc) {
-      triggerToast("Please provide at least a project title & description.");
+    const validDesc = newProjDesc.filter(d => d.trim() !== '');
+    if (!newProjTitle || validDesc.length === 0) {
+      triggerToast("Please provide at least a project title & one description point.");
       return;
     }
 
@@ -551,8 +606,8 @@ export default function App() {
       id: editingProjectId || `proj-${Date.now()}`,
       title: newProjTitle,
       tagline: newProjTagline || "Interactive developer deployment node",
-      description: newProjDesc,
-      longDescription: newProjLongDesc || newProjDesc,
+      description: validDesc,
+      longDescription: newProjLongDesc || validDesc.join(' '),
       tech: newProjTech ? newProjTech.split(',').map(tag => tag.trim()) : ['Docker', 'Terraform'],
       githubUrl: newProjGithub || 'https://github.com/vishwasshirurmath',
       demoUrl: newProjDemo || '#',
@@ -572,7 +627,7 @@ export default function App() {
     // Reset fields
     setNewProjTitle('');
     setNewProjTagline('');
-    setNewProjDesc('');
+    setNewProjDesc(['']);
     setNewProjLongDesc('');
     setNewProjTech('');
     setNewProjGithub('');
@@ -587,19 +642,39 @@ export default function App() {
       return;
     }
 
-    const newBlog: BlogPost = {
-      id: `blog-${Date.now()}`,
+    const blogData: BlogPost = {
+      id: editingBlogId || `blog-${Date.now()}`,
       title: newBlogTitle,
       excerpt: newBlogExcerpt || newBlogContent.substring(0, 110) + "...",
       content: newBlogContent,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       readTime: newBlogReadTime || '5 min read',
       category: newBlogCategory || 'Engineering',
-      views: 1
+      views: editingBlogId ? (blogs.find(b => b.id === editingBlogId)?.views || 1) : 1,
+      isSpotlight: newBlogIsSpotlight
     };
 
-    setBlogs(prev => [newBlog, ...prev]);
-    triggerToast(`Blog post "${newBlogTitle}" created!`);
+    setBlogs(prev => {
+      let updated = [...prev];
+      if (editingBlogId) {
+        updated = updated.map(b => b.id === editingBlogId ? blogData : b);
+      } else {
+        updated = [blogData, ...updated];
+      }
+      
+      // Enforce only one spotlight
+      if (newBlogIsSpotlight) {
+        updated = updated.map(b => b.id === blogData.id ? b : { ...b, isSpotlight: false });
+      }
+      return updated;
+    });
+
+    if (editingBlogId) {
+      triggerToast(`Blog post "${newBlogTitle}" updated!`);
+      setEditingBlogId(null);
+    } else {
+      triggerToast(`Blog post "${newBlogTitle}" created!`);
+    }
 
     // Reset fields
     setNewBlogTitle('');
@@ -607,6 +682,7 @@ export default function App() {
     setNewBlogContent('');
     setNewBlogCategory('');
     setNewBlogReadTime('4 min read');
+    setNewBlogIsSpotlight(false);
   };
 
   const deleteProject = (id: string) => {
@@ -620,7 +696,7 @@ export default function App() {
     );
   };
 
-  const deleteBlog = (id: string, e: MouseEvent) => {
+  const deleteBlog = (id: string, e: any) => {
     e.stopPropagation();
     askConfirmation(
       "Delete Blog Entry",
@@ -634,28 +710,35 @@ export default function App() {
 
   const addExperience = (e: FormEvent) => {
     e.preventDefault();
-    if (!newExpRole || !newExpCompany) {
-      triggerToast("Please provide both a role and company name.");
+    const validDesc = newExpDesc.filter(d => d.trim() !== '');
+    if (!newExpRole || !newExpCompany || validDesc.length === 0) {
+      triggerToast("Please provide role, company name, and at least one description point.");
       return;
     }
 
-    const newExp: ExperienceEntry = {
-      id: `exp-${Date.now()}`,
+    const expData: ExperienceEntry = {
+      id: editingExperienceId || `exp-${Date.now()}`,
       role: newExpRole,
       company: newExpCompany,
       period: newExpPeriod || "Present",
-      description: newExpDesc,
+      description: validDesc,
       tech: newExpTech ? newExpTech.split(',').map(t => t.trim()).filter(Boolean) : []
     };
 
-    setExperiences(prev => [newExp, ...prev]);
-    triggerToast(`Added experience at "${newExpCompany}"!`);
+    if (editingExperienceId) {
+      setExperiences(prev => prev.map(exp => exp.id === editingExperienceId ? expData : exp));
+      triggerToast(`Updated experience at "${newExpCompany}"!`);
+      setEditingExperienceId(null);
+    } else {
+      setExperiences(prev => [expData, ...prev]);
+      triggerToast(`Added experience at "${newExpCompany}"!`);
+    }
 
     // Reset
     setNewExpRole('');
     setNewExpCompany('');
     setNewExpPeriod('');
-    setNewExpDesc('');
+    setNewExpDesc(['']);
     setNewExpTech('');
   };
 
@@ -716,7 +799,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen relative transition-colors duration-700 pb-20 overflow-x-hidden ${themeObj.bgClass} ${themeObj.fontClassClass}`}>
+    <div className={`h-screen relative transition-colors duration-700 overflow-hidden ${themeObj.bgClass} ${themeObj.fontClassClass}`}>
       
       {/* Dynamic Interactive Anti-Gravity Vector Mesh Background */}
       <AntiGravityBackground nodeColor={themeObj.nodeColor} />
@@ -740,8 +823,8 @@ export default function App() {
           {/* Top Banner Navigation (Warm Minimalist Sleek Design) */}
           <header className={`flex flex-col sm:flex-row justify-between items-center ${themeObj.cardBgClass} ${themeObj.cardBorderClass} rounded-2xl px-6 py-4 mb-6 shadow-sm gap-4 transition-all`}>
             <div className="flex items-center gap-3">
-              <span className="h-3 w-3 rounded-full bg-amber-500 animate-[ping_1.5s_infinite]" />
-              <div>
+              <span className="h-3 w-3 rounded-full bg-amber-500 animate-[ping_1.5s_infinite] shrink-0" />
+              <div className="flex flex-col gap-1">
                 <span 
                   onDoubleClick={() => {
                     if (isLocalEnvironment) {
@@ -760,13 +843,20 @@ export default function App() {
 
             {/* Main Tabs */}
             <nav className={`flex flex-wrap items-center justify-center gap-1 p-1 rounded-xl transition ${isDarkMode ? 'bg-stone-900 border border-stone-800' : 'bg-stone-100'}`}>
-              {(isOwner && isLocalEnvironment ? ['home', 'about', 'projects', 'blogs', 'activity', 'extracurricular', 'crm'] : ['home', 'about', 'projects', 'blogs', 'activity', 'extracurricular'] as ActiveTab[]).map((tab) => {
+              {(['home', 'about', 'projects', 'blogs', 'activity', 'extracurricular'] as ActiveTab[]).map((tab) => {
                 const isActive = activeTab === tab;
                 return (
                   <button
                     key={tab}
                     id={`nav-tab-${tab}`}
-                    onClick={() => setActiveTab(tab as ActiveTab)}
+                    onClick={() => {
+                      if (scrollContainerRef.current) {
+                        const targetEl = document.getElementById(tab);
+                        if (targetEl) {
+                          scrollContainerRef.current.scrollTo({ left: targetEl.offsetLeft, behavior: 'smooth' });
+                        }
+                      }
+                    }}
                     className={`px-4 py-2 rounded-lg text-xs font-semibold capitalize tracking-wide transition-all ${
                       isActive
                         ? isDarkMode
@@ -777,7 +867,7 @@ export default function App() {
                           : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
                     }`}
                   >
-                    {tab === 'activity' ? 'Platform Integrations' : tab === 'extracurricular' ? 'Other Activities' : tab === 'crm' ? 'Content Studio' : tab}
+                    {tab === 'activity' ? 'Platform Integrations' : tab === 'extracurricular' ? 'Other Activities' : tab}
                   </button>
                 );
               })}
@@ -808,7 +898,7 @@ export default function App() {
                     }`}
                   >
                     <Settings className="h-3.5 w-3.5 animate-spin-slow" />
-                    Edit Portfolio
+                    Content Studio
                   </button>
                   <button
                     onClick={handleOwnerLogout}
@@ -821,6 +911,21 @@ export default function App() {
               )}
             </div>
           </header>
+
+          {/* Availability Status Billboard */}
+          {profile.availability && (
+            <div className={`mb-6 flex justify-center w-full animate-fadeIn`}>
+              <div className={`flex items-center gap-3 px-5 py-2.5 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-stone-900 border-green-900/40 text-stone-200' : 'bg-white border-green-200 text-stone-800'}`}>
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span className="text-sm font-bold font-mono tracking-widest uppercase text-green-700 dark:text-green-400">
+                  {profile.availability}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Theme Selecting Carousel Panel - Secured for Owner Only */}
           {isOwner && isLocalEnvironment && (
@@ -846,12 +951,9 @@ export default function App() {
           )}
 
           {/* Tab Views Content Core */}
-          <main className="space-y-6">
-            <AnimatePresence mode="wait">
-              
-              {/* HOME VIEW */}
-              {activeTab === 'home' && (
-                <motion.div
+          <main className="flex flex-nowrap w-full h-[calc(100vh-140px)] overflow-x-auto overflow-y-hidden snap-x snap-mandatory hide-scrollbar pb-8" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} ref={scrollContainerRef}>
+            {/* HOME VIEW */}
+              <div id="home" className="w-full flex-none snap-center relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar pr-2 sm:pr-4 pt-2 pb-24" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}><motion.div
                   key="home-tab"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -875,9 +977,12 @@ export default function App() {
                           <span>Edit Hero</span>
                         </button>
                       )}
-                      <span className="inline-block px-3.5 py-1.5 rounded-full bg-[#E9E1D6] dark:bg-amber-900/40 text-[#8B5E3C] dark:text-amber-500 text-[10px] font-bold uppercase tracking-widest italic col-span-full w-fit">
-                        {profile.role}
-                      </span>
+                      
+                      <div className="flex flex-col sm:flex-row gap-3 mb-2 sm:items-center">
+                        <span className="inline-block px-3.5 py-1.5 rounded-full bg-[#E9E1D6] dark:bg-amber-900/40 text-[#8B5E3C] dark:text-amber-500 text-[10px] font-bold uppercase tracking-widest italic w-fit">
+                          {profile.role}
+                        </span>
+                      </div>
                       
                       <h1 className={`text-4xl sm:text-5xl font-light ${isDarkMode ? 'text-white' : 'text-stone-900'} leading-[1.1] tracking-tight whitespace-pre-line`}>
                         {heroHeadline}
@@ -889,10 +994,18 @@ export default function App() {
 
                       {/* Micro Contact Pills */}
                       <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                        <a href={`mailto:${profile.email}`} className={`flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300 hover:text-white hover:border-amber-500/30' : 'bg-stone-50 border-stone-200 text-stone-600 hover:text-stone-900 hover:border-amber-500/30'} p-3 rounded-xl border text-sm font-mono transition-colors group`}>
+                        <button onClick={() => {
+                          navigator.clipboard.writeText(profile.email);
+                          triggerToast("Email copied to clipboard!");
+                          setEmailCopiedLocal(true);
+                          setTimeout(() => setEmailCopiedLocal(false), 2000);
+                        }} className={`relative flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300 hover:text-white hover:border-amber-500/30' : 'bg-stone-50 border-stone-200 text-stone-600 hover:text-stone-900 hover:border-amber-500/30'} p-3 rounded-xl border text-sm font-mono transition-colors group`}>
                           <Mail className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />
-                          <span className="break-all" title={profile.email}>{profile.email}</span>
-                        </a>
+                          <span className="break-all" title="Click to copy email">{profile.email}</span>
+                          {emailCopiedLocal && (
+                            <span className="text-[10px] absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-stone-800 text-white px-2 py-1 rounded shadow-lg animate-in fade-in zoom-in duration-200">Copied!</span>
+                          )}
+                        </button>
                         <div className={`flex items-center gap-3 ${isDarkMode ? 'bg-stone-900 border-stone-800 text-stone-300' : 'bg-stone-50 border-stone-200 text-stone-600'} p-3 rounded-xl border text-sm font-mono whitespace-nowrap`}>
                           <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0" />
                           <span className="truncate">{profile.location}</span>
@@ -972,7 +1085,7 @@ export default function App() {
                             </h4>
                           </div>
                           <p className={`font-black ${isDarkMode ? 'text-white' : 'text-stone-900'} text-xl tracking-tight leading-tight`}>{workingTitle}</p>
-                          <p className="text-sm text-stone-500 dark:text-stone-400">{workingDesc}</p>
+                          <p className="text-base text-stone-500 dark:text-stone-400">{workingDesc}</p>
                         </div>
                       </div>
                       
@@ -992,78 +1105,81 @@ export default function App() {
                     </div>
 
                     {/* Left Mini - Latest Project Spotlight */}
-                      <div className={`${themeObj.cardBgClass} ${themeObj.cardBorderClass} relative rounded-3xl p-7 shadow-sm border-2 flex flex-col justify-between hover:border-amber-500/30 transition-all group`}>
-                        {isOwner && isLocalEnvironment && (
-                          <button
-                            onClick={() => {
-                              setActiveConfigSection('spotlight');
-                              setShowConfigModal(true);
-                            }}
-                            className={`absolute top-5 right-5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${isDarkMode ? 'bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white' : 'bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 hover:text-stone-950'}`}
-                            title="Edit Spotlight"
-                          >
-                            <Settings className="h-3.5 w-3.5" />
-                            <span>Edit Project</span>
-                          </button>
-                        )}
-                        <div className="space-y-3 mt-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-md">
-                              Spotlight Work
-                            </span>
+                    {(() => {
+                      const spotlightBlog = blogs.find(b => b.isSpotlight);
+                      const displaySpotlight = spotlightBlog ? {
+                        title: spotlightBlog.title,
+                        description: spotlightBlog.excerpt,
+                        category: spotlightBlog.category,
+                        isBlog: true,
+                        blogRef: spotlightBlog
+                      } : (spotlightProject?.title ? {
+                        title: spotlightProject.title,
+                        description: spotlightProject.description,
+                        category: spotlightProject.category,
+                        isBlog: false
+                      } : null);
+
+                      if (!displaySpotlight) return null;
+
+                      return (
+                        <div className={`${isDarkMode ? 'bg-[#1a1a1a] border-stone-800' : 'bg-white border-stone-200'} rounded-3xl p-6 border-2 text-center sm:text-left shadow-sm relative overflow-hidden transition-all hover:border-amber-500/30 group cursor-pointer flex flex-col justify-between min-h-[200px]`} onClick={() => {
+                          if (displaySpotlight.isBlog && displaySpotlight.blogRef) {
+                            handleOpenBlog(displaySpotlight.blogRef);
+                          } else {
+                            handleOpenBlog({
+                              id: 'spotlight-article',
+                              title: displaySpotlight.title,
+                              excerpt: displaySpotlight.category,
+                              content: displaySpotlight.description,
+                              date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+                              readTime: '2 min read',
+                              category: 'Spotlight',
+                              views: 0
+                            });
+                          }
+                        }}>
+                          <div>
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-md mb-2 inline-block">
+                                Spotlight Work
+                              </span>
+                            </div>
+                            <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} text-xl group-hover:text-amber-600 transition-colors line-clamp-2`}>
+                              {displaySpotlight.title}
+                            </h4>
+                            <p className="text-sm text-stone-500 dark:text-stone-400 line-clamp-2 mt-2 leading-relaxed">
+                              {displaySpotlight.description}
+                            </p>
                           </div>
-                          <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} text-xl group-hover:text-amber-600 transition-colors pt-1`}>
-                            {spotlightProject.title}
-                          </h4>
-                          <p className="text-sm text-stone-500 dark:text-stone-400 line-clamp-3 leading-relaxed">
-                            {spotlightProject.description}
-                          </p>
+                          <div className={`mt-6 flex items-center gap-1.5 text-xs font-bold ${isDarkMode ? 'text-stone-300 group-hover:text-amber-500' : 'text-stone-600 group-hover:text-amber-600'} transition-colors`}>
+                            View Article <ChevronRight className="h-3 w-3" />
+                          </div>
                         </div>
-                        <button
-                          onClick={() => setActiveTab('projects')}
-                          className={`mt-8 flex items-center gap-1.5 text-xs font-bold ${isDarkMode ? 'text-stone-300 hover:text-amber-500' : 'text-stone-600 hover:text-amber-600'} transition-colors`}
-                        >
-                          <span>Explore project index</span>
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-                      </div>
+                      );
+                    })()}
 
                     {/* Right Mini - Fresh Blog snippet */}
-                      <div className={`${themeObj.cardBgClass} ${themeObj.cardBorderClass} relative rounded-3xl p-7 shadow-sm border-2 flex flex-col justify-between hover:border-amber-500/30 transition-all group`}>
-                        {isOwner && isLocalEnvironment && (
-                          <button
-                            onClick={() => {
-                              setActiveConfigSection('spotlight');
-                              setShowConfigModal(true);
-                            }}
-                            className={`absolute top-5 right-5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${isDarkMode ? 'bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white' : 'bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 hover:text-stone-950'}`}
-                            title="Edit Featured"
-                          >
-                            <Settings className="h-3.5 w-3.5" />
-                            <span>Edit Article</span>
-                          </button>
-                        )}
-                        <div className="space-y-3 mt-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-[#8B5E3C] dark:text-orange-400 bg-stone-100 dark:bg-orange-900/20 px-2.5 py-1 rounded-md">
+                    {featuredBlog?.title ? (
+                      <div className={`${isDarkMode ? 'bg-[#1a1a1a] border-stone-800' : 'bg-white border-stone-200'} rounded-3xl p-6 border-2 text-center sm:text-left shadow-sm relative overflow-hidden transition-all hover:border-orange-500/30 group cursor-pointer flex flex-col justify-between min-h-[200px]`} onClick={() => setActiveTab('blogs')}>
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-orange-600 dark:text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1 rounded-md mb-2 inline-block">
                               Featured Read
                             </span>
                           </div>
-                          <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} text-xl leading-snug group-hover:text-amber-600 transition-colors line-clamp-2 pt-1`}>
+                          <h4 className={`font-bold ${isDarkMode ? 'text-white' : 'text-stone-900'} text-xl group-hover:text-orange-600 transition-colors line-clamp-2`}>
                             {featuredBlog.title}
                           </h4>
-                          <p className="text-sm text-stone-500 dark:text-stone-400 line-clamp-3 leading-relaxed">
+                          <p className="text-sm text-stone-500 dark:text-stone-400 line-clamp-2 mt-2 leading-relaxed">
                             {featuredBlog.excerpt}
                           </p>
                         </div>
-                        <button
-                          onClick={() => setActiveTab('blogs')}
-                          className={`mt-8 flex items-center gap-1.5 text-xs font-bold ${isDarkMode ? 'text-stone-300 hover:text-amber-500' : 'text-stone-600 hover:text-amber-600'} transition-colors`}
-                        >
-                          <span>View article index</span>
-                          <BookOpen className="h-4 w-4" />
-                        </button>
+                        <div className={`mt-6 flex items-center gap-1.5 text-xs font-bold ${isDarkMode ? 'text-stone-300 group-hover:text-orange-500' : 'text-stone-600 group-hover:text-orange-600'} transition-colors`}>
+                          Read article <ChevronRight className="h-3 w-3" />
+                        </div>
                       </div>
+                    ) : null}
 
                     {/* Continuous Activities Link Card */}
                     <div className="md:col-span-2 bg-white/75 backdrop-blur-md rounded-[32px] p-6 border border-stone-200/40 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1084,11 +1200,10 @@ export default function App() {
                     </div>
                   </div>
                 </motion.div>
-              )}
+              </div>
 
               {/* ABOUT VIEW */}
-              {activeTab === 'about' && (
-                <motion.div
+              <div id="about" className="w-full flex-none snap-center relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar pr-2 sm:pr-4 pt-2 pb-24" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}><motion.div
                   key="about-tab"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1132,10 +1247,24 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Educational Journey cards */}
                     <div className={`${themeObj.cardBgClass} ${themeObj.cardBorderClass} rounded-[32px] p-6 shadow-sm space-y-6`}>
-                      <h3 className={`text-lg font-extrabold tracking-tight flex items-center gap-2 border-b pb-3 ${isDarkMode ? 'text-stone-100 border-stone-850' : 'text-stone-900 border-stone-100'}`}>
-                        <BookOpenCheck className="h-5 w-5 text-amber-600" />
-                        Academic Milestones
-                      </h3>
+                      <div className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-stone-850' : 'border-stone-100'}`}>
+                        <h3 className={`text-lg font-extrabold tracking-tight flex items-center gap-2 ${isDarkMode ? 'text-stone-100' : 'text-stone-900'}`}>
+                          <BookOpenCheck className="h-5 w-5 text-amber-600" />
+                          Academic Milestones
+                        </h3>
+                        {isOwner && isLocalEnvironment && (
+                          <button
+                            onClick={() => {
+                              setActiveConfigSection('education');
+                              setShowConfigModal(true);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1 shrink-0 scale-102 hover:scale-105 ${isDarkMode ? 'bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white' : 'bg-white/80 hover:bg-white text-stone-700 hover:text-stone-950'}`}
+                          >
+                            <Settings className="h-3.5 w-3.5 animate-spin-slow" />
+                            <span>Edit</span>
+                          </button>
+                        )}
+                      </div>
 
                       <div className={`space-y-6 relative before:absolute before:inset-y-1 before:left-2.5 before:w-0.5 ${isDarkMode ? 'before:bg-stone-850' : 'before:bg-stone-200'}`}>
                         {profile.education.map((edu, idx) => (
@@ -1150,7 +1279,7 @@ export default function App() {
                               </span>
                             </div>
                             <p className={`text-xs font-semibold font-mono mt-0.5 ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>{edu.institution} • {edu.grade}</p>
-                            <p className={`text-xs mt-2 leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-500'}`}>{edu.description}</p>
+                            <p className={`text-sm mt-2 leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-500'}`}>{edu.description}</p>
                           </div>
                         ))}
                       </div>
@@ -1235,10 +1364,9 @@ export default function App() {
                         <p className="text-stone-500 text-sm font-sans">No experience added yet. Click 'Manage Experience' to populate.</p>
                       </div>
                     ) : (
-                      <div className="space-y-8 relative before:absolute before:inset-y-2 before:left-3.5 before:w-0.5 before:bg-stone-200/80">
+                      <div className="space-y-8">
                         {experiences.map((exp) => (
-                          <div key={exp.id} className="relative pl-10 group">
-                            <span className="absolute left-[9px] top-1.5 h-4 w-4 rounded-full bg-amber-600 border-2 border-white group-hover:scale-110 transition-transform shadow-xs animate-pulse" />
+                          <div key={exp.id} className="relative group p-6 rounded-3xl border border-stone-200/50 bg-white/50 dark:bg-[#1a1a1a]/50 shadow-sm hover:shadow-md transition duration-300">
                             <div className="space-y-3">
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div>
@@ -1264,9 +1392,17 @@ export default function App() {
                                   )}
                                 </div>
                               </div>
-                              <p className={`text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans ${isDarkMode ? 'text-stone-300' : 'text-stone-700'}`}>
-                                {exp.description}
-                              </p>
+                              <div className={`text-sm sm:text-base leading-relaxed font-sans space-y-2 ${isDarkMode ? 'text-stone-300' : 'text-stone-700'}`}>
+                                {(Array.isArray(exp.description) ? exp.description : typeof exp.description === 'string' ? (exp.description.includes('•') ? exp.description.split('•').map(s => s.replace(/\n/g, ' ').trim()).filter(Boolean) : exp.description.split('\n')) : []).filter((line: string) => line.trim() !== '').map((line: string, i: number) => {
+                                  const trimmed = line.trim().replace(/^[\s•\-\*]+/, '');
+                                  return (
+                                    <div key={i} className="flex items-start gap-2.5">
+                                      <span className="shrink-0 mt-2 h-1.5 w-1.5 rounded-full bg-stone-400 dark:bg-stone-500" />
+                                      <span className="flex-1 whitespace-pre-wrap">{trimmed}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                               {exp.tech && exp.tech.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 pt-1">
                                   {exp.tech.map((t, tIdx) => (
@@ -1283,11 +1419,10 @@ export default function App() {
                     )}
                   </div>
                 </motion.div>
-              )}
+              </div>
 
               {/* PROJECTS VIEW */}
-              {activeTab === 'projects' && (
-                <motion.div
+              <div id="projects" className="w-full flex-none snap-center relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar pr-2 sm:pr-4 pt-2 pb-24" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}><motion.div
                   key="projects-tab"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1317,11 +1452,11 @@ export default function App() {
                   </div>
 
                   {/* Project Index Layout */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 xl:gap-8">
                     {projects.map((proj) => (
                       <div
                         key={proj.id}
-                        className="bg-white/80 backdrop-blur-md border border-stone-200/50 rounded-3xl p-6 shadow-md hover:-translate-y-1 transition duration-300 flex flex-col justify-between"
+                        className="bg-white/80 backdrop-blur-md border border-stone-200/50 rounded-[2rem] p-8 shadow-sm hover:-translate-y-1 hover:shadow-lg transition duration-300 flex flex-col justify-between min-h-[300px]"
                       >
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
@@ -1339,9 +1474,14 @@ export default function App() {
                             {proj.tagline}
                           </p>
 
-                          <p className="text-xs text-stone-500 leading-relaxed">
-                            {proj.description}
-                          </p>
+                          <div className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed space-y-1.5">
+                            {(Array.isArray(proj.description) ? proj.description : typeof proj.description === 'string' && proj.description.trim() !== '' ? (proj.description.includes('•') ? proj.description.split('•').map(s => s.replace(/\n/g, ' ').trim()).filter(s => s !== '') : proj.description.split('\n').map(s => s.trim().replace(/^[\s•\-\*]+/, '')).filter(s => s !== '')) : []).map((point, pIdx) => (
+                              <div key={pIdx} className="flex items-start gap-2">
+                                <span className="text-stone-400 dark:text-stone-500 mt-0.5 text-xs">●</span>
+                                <span className="flex-1">{point.replace(/^[\s•\-\*]+/, '')}</span>
+                              </div>
+                            ))}
+                          </div>
 
                           {/* Tech Chips */}
                           <div className="flex flex-wrap gap-1.5 pt-2">
@@ -1391,7 +1531,13 @@ export default function App() {
                                   setEditingProjectId(proj.id);
                                   setNewProjTitle(proj.title);
                                   setNewProjTagline(proj.tagline || '');
-                                  setNewProjDesc(proj.description);
+                                  setNewProjDesc(
+                                    Array.isArray(proj.description)
+                                      ? proj.description
+                                      : typeof proj.description === 'string' && proj.description.trim() !== ''
+                                        ? (proj.description.includes('•') ? proj.description.split('•').map(s => s.replace(/\n/g, ' ').trim()).filter(Boolean) : proj.description.split('\n').map(s => s.trim().replace(/^[\s•\-\*]+/, '')).filter(Boolean))
+                                        : ['']
+                                  );
                                   setNewProjLongDesc(proj.longDescription || '');
                                   setNewProjTech(proj.tech.join(', '));
                                   setNewProjGithub(proj.githubUrl || '');
@@ -1418,11 +1564,10 @@ export default function App() {
                     ))}
                   </div>
                 </motion.div>
-              )}
+              </div>
 
               {/* BLOGS VIEW */}
-              {activeTab === 'blogs' && (
-                <motion.div
+              <div id="blogs" className="w-full flex-none snap-center relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar pr-2 sm:pr-4 pt-2 pb-24" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}><motion.div
                   key="blogs-tab"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1453,25 +1598,55 @@ export default function App() {
 
                   {/* List of active Blog summaries */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {blogs.map((blog) => (
-                      <div
-                        key={blog.id}
-                        onClick={() => setReadingBlog(blog)}
-                        className="bg-white/80 backdrop-blur-md border border-stone-200/50 rounded-3xl p-6.5 shadow-md hover:-translate-y-1 transition duration-200 cursor-pointer group flex flex-col justify-between"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between text-xs text-stone-400 font-mono">
-                            <span className="bg-[#E9E1D6] text-[#8B5E3C] px-2 py-0.5 rounded font-bold uppercase tracking-wide text-[9px]">
-                              {blog.category}
-                            </span>
-                            <span>{blog.date}</span>
-                          </div>
+                    {(() => {
+                      const hasSpotlightBlog = blogs.some(b => b.isSpotlight);
+                      const legacySpotlight = (!hasSpotlightBlog && spotlightProject?.title) ? [{
+                        id: 'spotlight-article',
+                        title: spotlightProject.title,
+                        excerpt: spotlightProject.category,
+                        content: spotlightProject.description,
+                        date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+                        readTime: '2 min read',
+                        category: 'Spotlight'
+                      }] : [];
+                      
+                      const allBlogs = [...legacySpotlight, ...blogs];
+                      
+                      // Sort allBlogs to ensure isSpotlight (or legacy Spotlight) is first
+                      const sortedBlogs = allBlogs.sort((a, b) => {
+                        if (a.id === 'spotlight-article' || a.isSpotlight) return -1;
+                        if (b.id === 'spotlight-article' || b.isSpotlight) return 1;
+                        return 0;
+                      });
+
+                      return sortedBlogs.map((blog) => (
+                        <div
+                          key={blog.id}
+                          onClick={() => handleOpenBlog(blog)}
+                          className={`bg-white/80 backdrop-blur-md border ${blog.isSpotlight || blog.id === 'spotlight-article' ? 'border-amber-400 shadow-amber-500/20 shadow-lg relative' : 'border-stone-200/50 shadow-md'} rounded-3xl p-6.5 hover:-translate-y-1 transition duration-200 cursor-pointer group flex flex-col justify-between`}
+                        >
+                          {(blog.isSpotlight || blog.id === 'spotlight-article') && (
+                            <div className="absolute -top-3 -right-3 text-[10px] font-bold uppercase tracking-widest text-amber-700 bg-amber-100 border border-amber-200 px-3 py-1 rounded-full shadow-sm z-10 flex items-center gap-1.5">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                              </span>
+                              Spotlight
+                            </div>
+                          )}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between text-xs text-stone-400 font-mono">
+                              <span className="bg-[#E9E1D6] text-[#8B5E3C] px-2 py-0.5 rounded font-bold uppercase tracking-wide text-[9px]">
+                                {blog.category}
+                              </span>
+                              <span>{blog.date}</span>
+                            </div>
 
                           <h3 className="text-xl font-bold text-stone-950 group-hover:text-amber-800 transition leading-snug">
                             {blog.title}
                           </h3>
 
-                          <p className="text-sm text-stone-600 leading-relaxed pr-2 line-clamp-3">
+                          <p className="text-base text-stone-600 leading-relaxed pr-2 line-clamp-3">
                             {blog.excerpt}
                           </p>
                         </div>
@@ -1483,30 +1658,50 @@ export default function App() {
 
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] text-stone-400 font-mono italic">
-                              {blog.views} sandbox reads
+                              {blog.views || 0} sandbox reads
                             </span>
                             
-                            {/* Allow deleting any articles when logged in as owner */}
+                            {/* Allow editing/deleting any articles when logged in as owner */}
                             {isOwner && isLocalEnvironment && (
-                              <button
-                                onClick={(e) => deleteBlog(blog.id, e)}
-                                className="p-1.5 text-stone-400 hover:text-red-500 rounded transition"
-                                title="Delete blog"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingBlogId(blog.id);
+                                    setNewBlogTitle(blog.title);
+                                    setNewBlogCategory(blog.category);
+                                    setNewBlogReadTime(blog.readTime);
+                                    setNewBlogExcerpt(blog.excerpt);
+                                    setNewBlogContent(blog.content);
+                                    setNewBlogIsSpotlight(!!blog.isSpotlight);
+                                    setActiveConfigSection('blogs');
+                                    setShowConfigModal(true);
+                                  }}
+                                  className="p-1.5 text-stone-400 hover:text-amber-500 rounded transition"
+                                  title="Edit blog"
+                                >
+                                  <Settings className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => deleteBlog(blog.id, e)}
+                                  className="p-1.5 text-stone-400 hover:text-red-500 rounded transition"
+                                  title="Delete blog"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>
                       </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                 </motion.div>
-              )}
+              </div>
 
               {/* PLATFORM INTEGRATIONS & METRICS VIEW */}
-              {activeTab === 'activity' && (
-                <motion.div
+              <div id="activity" className="w-full flex-none snap-center relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar pr-2 sm:pr-4 pt-2 pb-24" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}><motion.div
                   key="activity-tab"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1684,10 +1879,10 @@ export default function App() {
                     <div className={`${themeObj.cardBgClass} ${themeObj.cardBorderClass} rounded-[32px] p-6 shadow-sm space-y-4`}>
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
-                          <h3 className={`text-sm font-extrabold ${isDarkMode ? 'text-stone-100' : 'text-stone-900'}`}>
+                          <h3 className={`text-sm sm:text-base font-extrabold ${isDarkMode ? 'text-stone-100' : 'text-stone-900'}`}>
                             Verified Multi-Platform Code Commit & Problem Heatmap
                           </h3>
-                          <p className="text-[10px] text-stone-400 font-mono">
+                          <p className="text-xs sm:text-sm text-stone-500 font-mono">
                             Aggregating activity metrics across internal repositories, GitHub, and integrated platforms.
                           </p>
                         </div>
@@ -1759,10 +1954,10 @@ export default function App() {
                           <Cpu className="h-5 w-5" />
                         </div>
                         <div>
-                          <h3 className={`font-extrabold text-sm ${isDarkMode ? 'text-stone-100' : 'text-stone-900'}`}>
+                          <h3 className={`font-extrabold text-base sm:text-lg ${isDarkMode ? 'text-stone-100' : 'text-stone-900'}`}>
                             Tech Software Learning Areas & Concept Mastery
                           </h3>
-                          <p className="text-[10px] text-stone-400 font-mono">Specialized learning vectors where I have gained hands-on expertise</p>
+                          <p className="text-xs sm:text-sm text-stone-500 font-mono">Specialized learning vectors where I have gained hands-on expertise</p>
                         </div>
                       </div>
 
@@ -1782,10 +1977,10 @@ export default function App() {
                                 </span>
                                 <span className="text-[9px] font-mono text-stone-400">Domain #{index+1}</span>
                               </div>
-                              <h4 className={`font-bold text-xs ${isDarkMode ? 'text-stone-100' : 'text-stone-800'}`}>
+                              <h4 className={`font-bold text-sm sm:text-base ${isDarkMode ? 'text-stone-100' : 'text-stone-800'}`}>
                                 {area.domain}
                               </h4>
-                              <p className={`text-[11px] leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
+                              <p className={`text-xs sm:text-sm mt-1 leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
                                 {area.topics}
                               </p>
                             </div>
@@ -1800,11 +1995,10 @@ export default function App() {
                     </div>
                   </div>
                 </motion.div>
-              )}
+              </div>
 
               {/* OTHER ACTIVITIES & EXTRACURRICULARS VIEW */}
-              {activeTab === 'extracurricular' && (
-                <motion.div
+              <div id="extracurricular" className="w-full flex-none snap-center relative h-full overflow-y-auto overflow-x-hidden hide-scrollbar pr-2 sm:pr-4 pt-2 pb-24" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}><motion.div
                   key="extracurricular-tab"
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1868,22 +2062,20 @@ export default function App() {
                               <Cpu className="h-5 w-5" />
                             )}
                           </div>
-                          <h4 className={`font-extrabold ${isDarkMode ? 'text-stone-100' : 'text-stone-900'} text-sm tracking-tight`}>{item.title}</h4>
-                          <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed font-sans">
+                          <h4 className={`font-extrabold ${isDarkMode ? 'text-stone-100' : 'text-stone-900'} text-base sm:text-lg tracking-tight`}>{item.title}</h4>
+                          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed font-sans mt-2">
                             {item.description}
                           </p>
                         </div>
-                        <span className="text-[10px] font-mono text-amber-800 dark:text-amber-400 uppercase font-bold tracking-wider pt-2 border-t border-stone-100 dark:border-stone-800">{item.role}</span>
+                        <span className="text-xs font-mono text-amber-800 dark:text-amber-400 uppercase font-bold tracking-wider pt-3 border-t border-stone-100 dark:border-stone-800">{item.role}</span>
                       </div>
                     ))}
                   </div>
                 </motion.div>
-              )}
+              </div>
+            </main>
 
-            </AnimatePresence>
-          </main>
-
-          {/* Minimalist Professional Footer */}
+            {/* Minimalist Professional Footer */}
           <footer className="mt-20 border-t border-stone-200/40 pt-8 pb-12 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 font-mono gap-4">
             <div>
               <span>© {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
@@ -1931,8 +2123,8 @@ export default function App() {
               </div>
 
               {/* Article Content */}
-              <div className="p-6 max-h-[60vh] overflow-y-auto space-y-4 text-justify font-serif text-stone-700 leading-relaxed text-sm md:text-base selection:bg-amber-100">
-                <blockquote className="border-l-4 border-amber-500 pl-4 py-1 italic font-sans text-stone-500 text-sm">
+              <div className="p-6 max-h-[60vh] overflow-y-auto space-y-4 text-justify font-serif text-stone-700 leading-relaxed text-base md:text-lg selection:bg-amber-100">
+                <blockquote className="border-l-4 border-amber-500 pl-4 py-1 italic font-sans text-stone-500 text-base sm:text-lg">
                   {readingBlog.excerpt}
                 </blockquote>
                 
@@ -1986,102 +2178,51 @@ export default function App() {
 
       {/* PORTFOLIO DEVELOPER CONFIG DRAWER MODAL (CRITICAL CUSTOMIZATION) */}
       <AnimatePresence>
-        {activeTab === 'crm' && (
-          <div className="fixed inset-0 bg-stone-50 dark:bg-[#111111] z-50 flex h-screen overflow-hidden text-stone-900 dark:text-stone-100 font-sans">
-             {/* CRM Sidebar */}
-             <div className="w-64 bg-white dark:bg-[#1a1a1a] border-r border-stone-200 dark:border-stone-800 flex flex-col shrink-0 rounded-none shadow-sm z-10">
-               <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex items-center gap-3">
-                  <div className="h-8 w-8 bg-black dark:bg-white text-white dark:text-black rounded-md flex items-center justify-center">
-                    <Database className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-bold tracking-tight">Content Studio</h2>
-                    <p className="text-[10px] text-stone-500 font-medium">Workspace</p>
-                  </div>
-               </div>
-               
-               <div className="flex-1 overflow-y-auto py-3 px-2 flex flex-col gap-0.5">
-                 <div className="text-[10px] font-bold tracking-wider uppercase text-stone-400 dark:text-stone-500 px-3 py-2 mt-2 mb-1">Content</div>
-                 {[
-                   { id: 'info', label: 'Bio & Overview', icon: <User className="h-4 w-4" /> },
-                   { id: 'projects', label: 'Projects', icon: <Layout className="h-4 w-4" /> },
-                   { id: 'blogs', label: 'Blog Posts', icon: <PenTool className="h-4 w-4" /> },
-                   { id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" /> },
-                   { id: 'education', label: 'Education', icon: <Book className="h-4 w-4" /> },
-                   { id: 'extracurricular', label: 'Activities', icon: <Compass className="h-4 w-4" /> }
-                 ].map((tab) => (
-                   <button
-                     key={tab.id}
-                     onClick={() => setActiveConfigSection(tab.id as any)}
-                     className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-3 ${
-                       activeConfigSection === tab.id
-                         ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
-                         : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-                     }`}
-                   >
-                     {tab.icon}
-                     {tab.label}
-                   </button>
-                 ))}
-
-                 <div className="text-[10px] font-bold tracking-wider uppercase text-stone-400 dark:text-stone-500 px-3 py-2 mt-4 mb-1">Settings</div>
-                 {[
-                   { id: 'working', label: 'Status Banner', icon: <Clock className="h-4 w-4" /> },
-                   { id: 'spotlight', label: 'Featured Items', icon: <Star className="h-4 w-4" /> },
-                   { id: 'activity', label: 'Integrations', icon: <Activity className="h-4 w-4" /> },
-                   { id: 'landing', label: 'Site Configuration', icon: <Cpu className="h-4 w-4" /> }
-                 ].map((tab) => (
-                   <button
-                     key={tab.id}
-                     onClick={() => setActiveConfigSection(tab.id as any)}
-                     className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-3 ${
-                       activeConfigSection === tab.id
-                         ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'
-                         : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800/50'
-                     }`}
-                   >
-                     {tab.icon}
-                     {tab.label}
-                   </button>
-                 ))}
-               </div>
-               
-               <div className="p-4 border-t border-stone-200 dark:border-stone-800">
-                 <button onClick={() => setActiveTab('home')} className="w-full py-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-bold rounded-md transition flex items-center justify-center gap-2">
-                   <ChevronRight className="h-3.5 w-3.5" /> Back to Website
-                 </button>
-               </div>
-             </div>
-
-             {/* CRM Content Area */}
-             <div className="flex-1 bg-stone-50 dark:bg-[#111111] overflow-y-auto relative">
-                {/* Top Navbar */}
-                <div className="h-16 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1a1a1a] flex items-center justify-between px-8 sticky top-0 z-10">
-                  <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
-                    <span>Workspace</span>
-                    <ChevronRight className="h-3 w-3" />
-                    <span className="capitalize font-semibold text-stone-900 dark:text-stone-100">{activeConfigSection}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3 text-emerald-500" /> Saved
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-8">
-                  <motion.div
+        {isOwner && isLocalEnvironment && showConfigModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-stone-950/80 backdrop-blur-sm overflow-y-auto"
+          >
+            <div className="min-h-screen py-10 px-4 flex justify-center items-start">
+              <motion.div
                     key={activeConfigSection}
-                    initial={{ opacity: 0, scale: 0.99 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="max-w-3xl mx-auto bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xs border border-stone-200 dark:border-stone-800 p-8 min-h-[calc(100vh-10rem)]"
+                    className="w-full max-w-4xl bg-white dark:bg-[#1a1a1a] rounded-[2rem] shadow-2xl border border-stone-200 dark:border-stone-800 p-8 sm:p-12 relative"
                   >
-                    <div className="mb-8 pb-4">
-                      <h3 className="text-2xl font-bold dark:text-white capitalize text-stone-900 tracking-tight">
-                        {activeConfigSection}
-                      </h3>
-                      <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Manage fields and content for this section.</p>
+                    <div className="mb-8 pb-4 border-b border-stone-200 dark:border-stone-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-2xl font-bold dark:text-white text-stone-900 tracking-tight flex items-center gap-3">
+                          Content Studio
+                          <span className={`text-[10px] sm:text-xs font-mono px-3 py-1 rounded-full ${isDarkMode ? 'bg-amber-900/30 text-amber-500 border border-amber-900/50' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>Editing: {activeConfigSection}</span>
+                        </h3>
+                        <button
+                          onClick={() => setShowConfigModal(false)}
+                          className="px-4 py-2 bg-stone-900 text-white hover:bg-stone-800 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-2"
+                        >
+                          Close Content Studio
+                        </button>
+                      </div>
+                      <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 mb-6">Manage fields and content for your portfolio.</p>
+                      
+                      <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        {['info', 'working', 'education', 'experience', 'projects', 'blogs', 'extracurricular', 'activity', 'landing'].map(section => (
+                          <button
+                            key={section}
+                            onClick={() => setActiveConfigSection(section as any)}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold capitalize transition-all whitespace-nowrap flex-shrink-0 ${
+                              activeConfigSection === section 
+                              ? isDarkMode ? 'bg-amber-500 text-stone-900 shadow-sm' : 'bg-stone-900 text-white shadow-sm' 
+                              : isDarkMode ? 'bg-stone-800 text-stone-400 hover:bg-stone-700 hover:text-white border border-transparent' : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900 border border-transparent'
+                            }`}
+                          >
+                            {section}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="space-y-6">
@@ -2108,6 +2249,17 @@ export default function App() {
                           className="w-full text-xs font-medium border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 dark:bg-stone-900/50 focus:bg-white dark:focus:bg-stone-900 dark:text-white focus:outline-amber-400"
                         />
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1 flex items-center gap-2">Availability Status <span className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[8px] font-bold">NEW</span></label>
+                      <input
+                        type="text"
+                        required
+                        value={editAvailability}
+                        onChange={(e) => setEditAvailability(e.target.value)}
+                        placeholder="e.g. 🟢 Open to work, 🚀 Working at Google"
+                        className="w-full text-xs font-medium border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 dark:bg-stone-900/50 focus:bg-white dark:focus:bg-stone-900 dark:text-white focus:outline-amber-400"
+                      />
                     </div>
 
                     <div>
@@ -2215,7 +2367,7 @@ export default function App() {
                         </button>
                       </div>
                       
-                      <div className="space-y-4 max-h-64 overflow-y-auto pr-1">
+                      <div className="space-y-4 pr-1">
                         {editSkills.map((skillGroup, idx) => (
                           <div key={idx} className="p-3 border border-stone-200 rounded-xl space-y-3 relative bg-stone-50/40">
                             <button
@@ -2296,52 +2448,7 @@ export default function App() {
                   </form>
                 )}
 
-                {activeConfigSection === 'spotlight' && (
-                  <form onSubmit={(e) => { 
-                    e.preventDefault(); 
-                    localStorage.setItem('owner_spotlight', JSON.stringify(spotlightProject));
-                    localStorage.setItem('owner_featured_blog', JSON.stringify(featuredBlog));
-                    triggerToast("Spotlight & Featured updated!"); 
-                  }} className="space-y-6">
-                    <div className="space-y-4">
-                      <h4 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider font-mono">Spotlight Project</h4>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Project Title</label>
-                        <input type="text" value={spotlightProject.title} onChange={e => setSpotlightProject(prev => ({...prev, title: e.target.value}))} className="w-full text-xs font-bold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Category & Tags</label>
-                        <input type="text" value={spotlightProject.category} onChange={e => setSpotlightProject(prev => ({...prev, category: e.target.value}))} className="w-full text-xs font-semibold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Description</label>
-                        <textarea rows={3} value={spotlightProject.description} onChange={e => setSpotlightProject(prev => ({...prev, description: e.target.value}))} className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 leading-relaxed" />
-                      </div>
-                    </div>
 
-                    <div className="space-y-4 pt-4 border-t border-stone-100">
-                      <h4 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider font-mono">Featured Read (Blog)</h4>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Blog Title</label>
-                        <input type="text" value={featuredBlog.title} onChange={e => setFeaturedBlog(prev => ({...prev, title: e.target.value}))} className="w-full text-xs font-bold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Date String</label>
-                        <input type="text" value={featuredBlog.date} onChange={e => setFeaturedBlog(prev => ({...prev, date: e.target.value}))} className="w-full text-xs font-semibold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Excerpt / Highlight</label>
-                        <textarea rows={3} value={featuredBlog.excerpt} onChange={e => setFeaturedBlog(prev => ({...prev, excerpt: e.target.value}))} className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 leading-relaxed" />
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-stone-100 flex items-center justify-end">
-                      <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs">
-                        Keep Changes
-                      </button>
-                    </div>
-                  </form>
-                )}
 
                 {activeConfigSection === 'education' && (
                   <form onSubmit={saveEducationInfo} className="space-y-4">
@@ -2369,7 +2476,7 @@ export default function App() {
                       </button>
                     </div>
 
-                    <div className="space-y-5 max-h-96 overflow-y-auto pr-1">
+                    <div className="space-y-5 pr-1">
                       {editEducation.map((edu, idx) => (
                         <div key={idx} className="p-3 border border-stone-200 rounded-xl space-y-3 relative bg-stone-50/40">
                           <button
@@ -2751,7 +2858,7 @@ export default function App() {
                       {extracurriculars.length === 0 ? (
                         <p className="text-xs text-stone-400 font-mono italic">No extracurricular entries present. Add some above.</p>
                       ) : (
-                        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                        <div className="space-y-4 pr-1">
                           {extracurriculars.map((item, index) => (
                             <div key={item.id} className="p-4 border border-stone-200 rounded-2xl bg-stone-50 space-y-3 relative group">
                               <button
@@ -2827,8 +2934,24 @@ export default function App() {
                   <form onSubmit={addExperience} className="space-y-4">
                     <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                       <h4 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider font-mono">
-                        Add Professional experience / Internship record
+                        {editingExperienceId ? 'Edit Professional Experience' : 'Add Professional experience / Internship record'}
                       </h4>
+                      {editingExperienceId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingExperienceId(null);
+                            setNewExpRole('');
+                            setNewExpCompany('');
+                            setNewExpPeriod('');
+                            setNewExpDesc(['']);
+                            setNewExpTech('');
+                          }}
+                          className="text-xs font-bold text-stone-500 hover:text-stone-800"
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -2880,21 +3003,49 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Detailed Description of Responsibilities & Achievements</label>
-                      <textarea
-                        rows={4}
-                        required
-                        value={newExpDesc}
-                        onChange={(e) => setNewExpDesc(e.target.value)}
-                        placeholder="Coordinated multi-region active cluster failovers. Audited security boundaries..."
-                        className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 leading-relaxed"
-                      />
+                      <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Key Responsibilities & Achievements (Points)</label>
+                      <div className="space-y-2">
+                        {newExpDesc.map((descPoint, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <span className="mt-1 text-stone-400 font-bold">•</span>
+                            <textarea
+                              rows={2}
+                              value={descPoint}
+                              onChange={(e) => {
+                                const newDesc = [...newExpDesc];
+                                newDesc[idx] = e.target.value;
+                                setNewExpDesc(newDesc);
+                              }}
+                              placeholder={idx === 0 ? "Describe key outcomes visibly..." : "Add another achievement point..."}
+                              className="flex-1 text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 leading-relaxed"
+                              required={idx === 0}
+                            />
+                            {newExpDesc.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setNewExpDesc(newExpDesc.filter((_, i) => i !== idx))}
+                                className="p-1 mt-1 text-stone-400 hover:text-red-500 rounded"
+                                title="Remove point"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNewExpDesc([...newExpDesc, ''])}
+                        className="mt-3 text-xs text-amber-600 font-bold flex items-center gap-1 hover:text-amber-700"
+                      >
+                        <Plus className="h-3 w-3" /> Add bullet point
+                      </button>
                     </div>
 
                     <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
                       <span className="text-[10px] text-stone-400 font-mono font-bold">Changes persist instantly to user profile.</span>
                       <button type="submit" className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs">
-                        Add Experience Card
+                        {editingExperienceId ? 'Save Changes' : 'Add Experience Card'}
                       </button>
                     </div>
 
@@ -2902,21 +3053,77 @@ export default function App() {
                     {experiences.length > 0 && (
                       <div className="pt-4 mt-4 border-t border-stone-150">
                         <span className="text-xs font-bold text-[#D97706] block mb-2 font-mono uppercase tracking-widest text-[10px]">Existing Experience Timeline Rows ({experiences.length})</span>
-                        <div className="space-y-2 max-h-[22vh] overflow-y-auto pr-1">
-                          {experiences.map(exp => (
+                        <div className="space-y-2 pr-1">
+                          {experiences.map((exp, expIdx) => (
                             <div key={exp.id} className="flex items-center justify-between p-2.5 bg-stone-50 rounded-lg border border-stone-200/50 text-xs">
-                              <div className="truncate pr-4">
+                              <div className="truncate pr-4 flex-1">
                                 <span className="font-bold text-stone-900">{exp.role}</span>
                                 <span className="text-stone-500 font-mono text-[10px] ml-1.5 font-bold">@ {exp.company}</span>
                               </div>
-                              <button
-                                type="button"
-                                onClick={(e) => deleteExperience(exp.id, e)}
-                                className="text-red-650 hover:bg-red-50 p-1 rounded-md transition duration-150 text-red-650 shrink-0"
-                                title="Delete Experience"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (expIdx > 0) {
+                                      const newExp = [...experiences];
+                                      [newExp[expIdx - 1], newExp[expIdx]] = [newExp[expIdx], newExp[expIdx - 1]];
+                                      setExperiences(newExp);
+                                    }
+                                  }}
+                                  disabled={expIdx === 0}
+                                  className="text-stone-500 hover:bg-stone-200 disabled:opacity-30 p-1 rounded-md transition duration-150"
+                                  title="Move Up"
+                                >
+                                  <ChevronUp className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    if (expIdx < experiences.length - 1) {
+                                      const newExp = [...experiences];
+                                      [newExp[expIdx], newExp[expIdx + 1]] = [newExp[expIdx + 1], newExp[expIdx]];
+                                      setExperiences(newExp);
+                                    }
+                                  }}
+                                  disabled={expIdx === experiences.length - 1}
+                                  className="text-stone-500 hover:bg-stone-200 disabled:opacity-30 p-1 rounded-md transition duration-150"
+                                  title="Move Down"
+                                >
+                                  <ChevronDown className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setEditingExperienceId(exp.id);
+                                    setNewExpRole(exp.role);
+                                    setNewExpCompany(exp.company);
+                                    setNewExpPeriod(exp.period);
+                                    setNewExpDesc(
+                                      Array.isArray(exp.description)
+                                        ? exp.description
+                                        : typeof exp.description === 'string' && exp.description.trim() !== ''
+                                          ? (exp.description.includes('•') ? exp.description.split('•').map(s => s.replace(/\n/g, ' ').trim()).filter(Boolean) : exp.description.split('\n').map(s => s.trim().replace(/^[\s•\-\*]+/, '')).filter(Boolean))
+                                          : ['']
+                                    );
+                                    setNewExpTech(exp.tech.join(', '));
+                                  }}
+                                  className="text-stone-500 hover:bg-stone-200 p-1 rounded-md transition duration-150 shrink-0"
+                                  title="Edit Experience"
+                                >
+                                  <Settings className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => deleteExperience(exp.id, e)}
+                                  className="text-red-650 hover:bg-red-50 p-1 rounded-md transition duration-150 shrink-0"
+                                  title="Delete Experience"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -2963,16 +3170,20 @@ export default function App() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Subcategory</label>
-                        <select
+                        <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Subcategory / Tag</label>
+                        <input
+                          type="text"
+                          list="project-categories"
                           value={newProjCategory}
-                          onChange={(e) => setNewProjCategory(e.target.value as any)}
+                          onChange={(e) => setNewProjCategory(e.target.value)}
+                          placeholder="e.g. Cloud, Mobile, Security..."
                           className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-white"
-                        >
-                          <option value="Cloud">Cloud Infrastructure</option>
-                          <option value="Security">Cybersecurity</option>
-                          <option value="Systems">Systems Design</option>
-                        </select>
+                        />
+                        <datalist id="project-categories">
+                          <option value="Cloud Infrastructure" />
+                          <option value="Cybersecurity" />
+                          <option value="Systems Design" />
+                        </datalist>
                       </div>
                     </div>
 
@@ -2988,15 +3199,43 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Core Description (Snippet)</label>
-                      <textarea
-                        rows={2}
-                        required
-                        value={newProjDesc}
-                        onChange={(e) => setNewProjDesc(e.target.value)}
-                        placeholder="Explain features cleanly for engineering hiring pipelines..."
-                        className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2"
-                      />
+                      <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Core Description (Snippet Points)</label>
+                      <div className="space-y-2">
+                        {newProjDesc.map((descPoint, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <span className="mt-1 text-stone-400 font-bold">•</span>
+                            <textarea
+                              rows={2}
+                              value={descPoint}
+                              onChange={(e) => {
+                                const newDesc = [...newProjDesc];
+                                newDesc[idx] = e.target.value;
+                                setNewProjDesc(newDesc);
+                              }}
+                              placeholder={idx === 0 ? "Explain features cleanly..." : "Add another description point..."}
+                              className="flex-1 text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2"
+                              required={idx === 0}
+                            />
+                            {newProjDesc.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setNewProjDesc(newProjDesc.filter((_, i) => i !== idx))}
+                                className="p-1 mt-1 text-stone-400 hover:text-red-500 rounded"
+                                title="Remove point"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setNewProjDesc([...newProjDesc, ''])}
+                        className="mt-2 text-xs text-amber-600 font-bold flex items-center gap-1 hover:text-amber-700"
+                      >
+                        <Plus className="h-3 w-3" /> Add bullet point
+                      </button>
                     </div>
 
                     <div>
@@ -3041,15 +3280,129 @@ export default function App() {
                         {editingProjectId ? 'Save Changes' : 'Publish Project Node'}
                       </button>
                     </div>
+
+                    {/* Manage Existing Projects */}
+                    {projects.length > 0 && (
+                      <div className="pt-4 mt-4 border-t border-stone-150">
+                        <span className="text-xs font-bold text-[#D97706] block mb-2 font-mono uppercase tracking-widest text-[10px]">Existing Projects ({projects.length})</span>
+                        <div className="space-y-2 pr-1">
+                          {projects.map(proj => (
+                            <div key={proj.id} className="flex items-center justify-between p-2.5 bg-stone-50 rounded-lg border border-stone-200/50 text-xs shadow-sm">
+                              <div className="truncate pr-4">
+                                <span className="font-bold text-stone-900">{proj.title}</span>
+                                <span className="text-stone-500 text-[10px] ml-1.5 font-bold px-1.5 py-0.5 rounded-full bg-stone-200/50 uppercase">{proj.category}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setEditingProjectId(proj.id);
+                                    setNewProjTitle(proj.title);
+                                    setNewProjTagline(proj.tagline || '');
+                                    setNewProjDesc(
+                                      Array.isArray(proj.description)
+                                        ? proj.description
+                                        : typeof proj.description === 'string' && proj.description.trim() !== ''
+                                          ? (proj.description.includes('•') ? proj.description.split('•').map(s => s.replace(/\n/g, ' ').trim()).filter(Boolean) : proj.description.split('\n').map(s => s.trim().replace(/^[\s•\-\*]+/, '')).filter(Boolean))
+                                          : ['']
+                                    );
+                                    setNewProjLongDesc(proj.longDescription || '');
+                                    setNewProjTech(proj.tech.join(', '));
+                                    setNewProjGithub(proj.githubUrl || '');
+                                    setNewProjDemo(proj.demoUrl || '');
+                                    setNewProjCategory(proj.category);
+                                  }}
+                                  className="text-stone-500 hover:bg-stone-200 p-1.5 rounded-md transition duration-150 shrink-0"
+                                  title="Edit Project"
+                                >
+                                  <Settings className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); deleteProject(proj.id); }}
+                                  className="text-red-650 hover:bg-red-50 p-1.5 rounded-md transition duration-150 shrink-0"
+                                  title="Delete Project"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </form>
                 )}
 
                 {activeConfigSection === 'blogs' && (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
+                    {/* Spotlight & Featured Config */}
+                    <form onSubmit={(e) => { 
+                      e.preventDefault(); 
+                      localStorage.setItem('owner_spotlight', JSON.stringify(spotlightProject));
+                      localStorage.setItem('owner_featured_blog', JSON.stringify(featuredBlog));
+                      triggerToast("Spotlight & Featured updated!"); 
+                    }} className="space-y-6">
+                      <div className="space-y-4">
+                        <h4 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider font-mono">Spotlight Project / Default Spotlight</h4>
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Project Title</label>
+                          <input type="text" value={spotlightProject.title} onChange={e => setSpotlightProject(prev => ({...prev, title: e.target.value}))} className="w-full text-xs font-bold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Category & Tags</label>
+                          <input type="text" value={spotlightProject.category} onChange={e => setSpotlightProject(prev => ({...prev, category: e.target.value}))} className="w-full text-xs font-semibold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Description</label>
+                          <textarea rows={3} value={spotlightProject.description} onChange={e => setSpotlightProject(prev => ({...prev, description: e.target.value}))} className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 leading-relaxed" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-stone-100">
+                        <h4 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider font-mono">Featured Read (Blog Highlight)</h4>
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Blog Title</label>
+                          <input type="text" value={featuredBlog.title} onChange={e => setFeaturedBlog(prev => ({...prev, title: e.target.value}))} className="w-full text-xs font-bold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Date String</label>
+                          <input type="text" value={featuredBlog.date} onChange={e => setFeaturedBlog(prev => ({...prev, date: e.target.value}))} className="w-full text-xs font-semibold border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Excerpt / Highlight</label>
+                          <textarea rows={3} value={featuredBlog.excerpt} onChange={e => setFeaturedBlog(prev => ({...prev, excerpt: e.target.value}))} className="w-full text-xs border border-stone-300 dark:border-stone-800 rounded-lg p-2 bg-stone-50 leading-relaxed" />
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-stone-100 flex items-center justify-end">
+                        <button type="submit" className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs">
+                          Save Spotlight & Featured
+                        </button>
+                      </div>
+                    </form>
+
                     {/* Add Article Form */}
                     <form onSubmit={addBlogPost} className="space-y-4 bg-amber-500/5 p-4 rounded-2xl border border-amber-500/10">
-                      <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                        <PlusCircle className="h-4 w-4" /> Add New Engineering Article
+                      <h4 className="font-extrabold text-xs text-amber-800 uppercase tracking-wider font-mono flex items-center justify-between">
+                        <span className="flex items-center gap-1.5"><PlusCircle className="h-4 w-4" /> {editingBlogId ? 'Edit Engineering Article' : 'Add New Engineering Article'}</span>
+                        {editingBlogId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingBlogId(null);
+                              setNewBlogTitle('');
+                              setNewBlogCategory('');
+                              setNewBlogReadTime('4 min read');
+                              setNewBlogExcerpt('');
+                              setNewBlogContent('');
+                            }}
+                            className="text-stone-500 hover:text-stone-800 underline uppercase tracking-widest text-[10px]"
+                          >
+                            Cancel Edit
+                          </button>
+                        )}
                       </h4>
                       <div>
                         <label className="block text-[10px] font-mono uppercase text-stone-400 mb-1">Blog Post Title</label>
@@ -3111,13 +3464,24 @@ export default function App() {
                         />
                       </div>
 
+                      <div className="flex items-center gap-2 mt-2">
+                        <input
+                          type="checkbox"
+                          id="newBlogIsSpotlight"
+                          className="w-4 h-4 text-amber-600 bg-stone-100 border-stone-300 rounded focus:ring-amber-500 focus:ring-2"
+                          checked={newBlogIsSpotlight}
+                          onChange={(e) => setNewBlogIsSpotlight(e.target.checked)}
+                        />
+                        <label htmlFor="newBlogIsSpotlight" className="text-xs font-bold text-stone-700">Set as Spotlight Article</label>
+                      </div>
+
                       <div className="flex justify-end">
                         <button
                           type="submit"
                           className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1"
                         >
                           <Plus className="h-4 w-4" />
-                          <span>Publish Article</span>
+                          <span>{editingBlogId ? 'Save Changes' : 'Publish Article'}</span>
                         </button>
                       </div>
                     </form>
@@ -3128,7 +3492,7 @@ export default function App() {
                       {blogs.length === 0 ? (
                         <p className="text-xs text-stone-400 font-mono italic">No articles present. Publish a new article above.</p>
                       ) : (
-                        <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                        <div className="space-y-4 pr-1">
                           {blogs.map((item, index) => (
                             <div key={item.id} className="p-4 border border-stone-200 rounded-2xl bg-stone-50 space-y-3 relative group">
                               <button
@@ -3139,8 +3503,27 @@ export default function App() {
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
-                              <div className="border-b border-stone-200 pb-1">
+                              <div className="border-b border-stone-200 pb-2 flex items-center justify-between">
                                 <span className="text-[10px] font-mono text-stone-400 font-bold uppercase">Article #{index + 1}</span>
+                                <div className="flex items-center gap-1.5 mr-6 bg-stone-100 px-2 py-1 rounded">
+                                  <input
+                                    type="checkbox"
+                                    id={`manageBlogSpotlight-${item.id}`}
+                                    className="w-3 h-3 text-amber-600 focus:ring-amber-500 rounded"
+                                    checked={!!item.isSpotlight}
+                                    onChange={e => {
+                                      const checked = e.target.checked;
+                                      const updated = blogs.map((it, idx) => {
+                                        if (idx === index) {
+                                          return { ...it, isSpotlight: checked };
+                                        }
+                                        return checked ? { ...it, isSpotlight: false } : it;
+                                      });
+                                      setBlogs(updated);
+                                    }}
+                                  />
+                                  <label htmlFor={`manageBlogSpotlight-${item.id}`} className="text-[9px] font-bold text-stone-600 uppercase">Spotlight</label>
+                                </div>
                               </div>
                               <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -3314,10 +3697,9 @@ export default function App() {
                   </div>
                 )}
               </div>
-            </motion.div>
+              </motion.div>
             </div>
-            </div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

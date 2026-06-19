@@ -31,7 +31,7 @@ export interface ProjectEntry {
   id: string;
   title: string;
   tagline: string;
-  description: string;
+  description: string[];
   tech: string[];
   githubUrl: string;
   demoUrl: string;
@@ -49,6 +49,7 @@ export interface BlogPost {
   readTime: string;
   category: string;
   views: number;
+  isSpotlight?: boolean;
 }
 
 export interface ActivityTracker {
@@ -72,6 +73,7 @@ export interface ProfileInfo {
   linkedin: string;
   resume: string;
   bio: string;
+  availability?: string;
   skills: SkillGroup[];
   education: Education[];
 }
@@ -81,7 +83,7 @@ export interface ExperienceEntry {
   role: string;
   company: string;
   period: string;
-  description: string;
+  description: string | string[];
   tech: string[];
 }
 

@@ -1,14 +1,13 @@
 {
   "profile": {
     "name": "Vishwas Shirurmath",
-    "role": "Software Engineering Graduate",
+    "role": "Aspiring Software Engineer",
     "subRole": "Aspiring DevSecOps, Cloud & System Design Engineer focused on building secure, scalable, and automated infrastructure. Passionate about cloud-native technologies, cybersecurity, and designing resilient distributed systems.",
     "email": "vishwasshirurmath123@gmail.com",
     "phone": "+91 94827 XXXXX",
     "location": "Mysore, India",
     "github": "https://github.com/vishwasshirurmath",
     "linkedin": "https://www.linkedin.com/in/vishwas-shirurmath",
-    "resume": "",
     "bio": "Driven by curiosity and obsessed with growth, I build secure, scalable, and automated solutions while continuously exploring the latest advancements in cloud, DevOps,System Design and cybersecurity.",
     "skills": [
       {
@@ -62,7 +61,7 @@
       {
         "degree": "Bachelor of Engineering in Computer Science & Engineering(Cyber Security and Digital Forensics)",
         "institution": "Vellore Institue of Technology,Bhopal University",
-        "period": "2023-2027",
+        "period": "SEPT 2023-MAY 2027",
         "grade": "Grade: B",
         "description": ""
       },
@@ -73,9 +72,31 @@
         "grade": "Grade: A",
         "description": ""
       }
-    ]
+    ],
+    "resume": "https://vishwasshirurmath.tiiny.site",
+    "availability": "Open to work"
   },
-  "projects": [],
+  "projects": [
+    {
+      "id": "proj-1781865760920",
+      "title": "Nutrition Analysis using ML (NutriScore Predictor)",
+      "tagline": "Your Everyday Nutrition Analysis ",
+      "description": [
+        "Developed and deployed a machine learning-based nutritional analysis application using Docker, cloud platforms, and containerized workflows to ensure portability, scalability, and efficient resource utilization.",
+        "Integrated frontend, backend, REST APIs, and predictive machine learning models into a unified full-stack architecture, enabling real-time nutritional recommendations and data processing.",
+        "Optimized system integration, application performance, and deployment pipelines, improving scalability, reliability, and operational efficiency across cloud-based environments.",
+        "Leveraged DevOps principles and containerization technologies to streamline configuration management, deployment automation, and infrastructure provisioning."
+      ],
+      "longDescription": "Developed and deployed a machine learning-based nutritional analysis application using Docker, cloud platforms, and containerized workflows to ensure portability, scalability, and efficient resource utilization. Integrated frontend, backend, REST APIs, and predictive machine learning models into a unified full-stack architecture, enabling real-time nutritional recommendations and data processing. Optimized system integration, application performance, and deployment pipelines, improving scalability, reliability, and operational efficiency across cloud-based environments. Leveraged DevOps principles and containerization technologies to streamline configuration management, deployment automation, and infrastructure provisioning.",
+      "tech": [
+        "Deployment and System Integration Tools"
+      ],
+      "githubUrl": "https://github.com/VishwasShirurmath/Nutrition-Analysis-using-ML.git",
+      "demoUrl": "#",
+      "category": "Cloud",
+      "featured": false
+    }
+  ],
   "blogs": [],
   "dsaPlatforms": [],
   "learningAreas": [],
@@ -99,17 +120,51 @@
       "description": "Contributed to the successful execution of Advitya, VIT Bhopal's annual cultural fest, by coordinating event logistics, managing participant engagement, and supporting on-ground operations. Collaborated with cross-functional teams to ensure smooth event execution and an engaging experience for attendees.\nDirected cricket tournaments and sports activities, overseeing team coordination, match scheduling, and event logistics. Enhanced participant engagement and ensured efficient execution of university-level sporting events."
     }
   ],
-  "experiences": [],
+  "experiences": [
+    {
+      "id": "exp-1781809501678",
+      "role": "Information Security Intern",
+      "company": "Defense Institute of Advanced Technology (DIAT), DRDO Pune",
+      "period": "MAY 2026 - JULY 2026",
+      "description": [
+        "Architected a decentralized Zero Trust Architecture (ZTA) for tactical edge environments using K3s, SPIFFE/SPIRE, Envoy Proxy, and Open Policy Agent (OPA), enabling secure identity-based communication and mutual TLS (mTLS) authentication without centralized cloud dependency.",
+        "Engineered a cloud-native observability platform leveraging FastAPI, PostgreSQL, React, Prometheus, and Grafana to monitor real-time network telemetry, security events, trust scores, and infrastructure health across distributed environments.",
+        "Implemented policy-driven access control, local authorization caching, and dynamic security enforcement mechanisms, eliminating fail-open conditions and improving resilience during network disruptions and disconnected operations.",
+        "Containerized and orchestrated microservices using Docker and Kubernetes, streamlining deployment workflows, improving scalability, and enabling automated infrastructure monitoring and anomaly detection. Developed real-time threat detection and security monitoring capabilities by integrating telemetry analytics, policy evaluation, and observability pipelines to identify suspicious network behavior and operational risks."
+      ],
+      "tech": [
+        "CLOUD",
+        "DEVOPS TOOLS",
+        "ZTA(ZERO-TRUST ARCHITECTURE)"
+      ]
+    },
+    {
+      "id": "exp-1781865466266",
+      "role": "Virtual Intern",
+      "company": "SmartBridge-SalesForce",
+      "period": "JUN 2025 – AUG 2025",
+      "description": [
+        "Explored and applied Salesforce's CRM platform, focusing on Sales Cloud, Service Cloud, and Marketing Cloud functionalities to simulate real-world business cases.",
+        "Developed data models and optimized Lightning App Builder configurations to enhance user interface responsiveness and business intelligence.",
+        "Evaluated platform-specific risks and compliance concerns in data governance, gaining hands-on familiarity with secure data modeling and access control frameworks."
+      ],
+      "tech": [
+        "CMR Platform",
+        "Cloud",
+        "No Code Platform"
+      ]
+    }
+  ],
   "spotlightProject": {
-    "title": "Antigravity OS Framework",
-    "description": "A comprehensive AI-driven task orchestration framework designed for single-view web environments. Built on modern modular paradigms.",
-    "category": "SYSTEMS",
-    "imageUrl": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2670&auto=format&fit=crop"
+    "title": " Secure Tactical Edge Cloud",
+    "description": "Military and tactical edge units operate in Disconnected, Intermittent, and Limited (DIL) environments where connectivity to central command can be severed by:\n\nEMCON (Emissions Control / Radio Silence)\nElectronic Warfare jamming\nKinetic strikes on communications infrastructure\nSubmarine operations at depth\nTraditional VPN/perimeter security fails catastrophically in these scenarios:\n\nFailure Mode\tConsequence\nFail Closed\tAll authentication denied → mission halts, assets become inert\nFail Open\tSecurity bypassed → adversary gains unrestricted lateral movement\nThis project eliminates both failure modes by deploying a complete Zero-Trust stack locally at the edge.\n\n",
+    "category": "Zero-Trust Architecture for Disconnected, Intermittent, and Limited (DIL) Environments",
+    "imageUrl": ""
   },
   "featuredBlog": {
-    "title": "Rethinking Component Modular Architecture in 2026",
-    "excerpt": "Analyzing the shift towards completely autonomous component islands.",
-    "date": "OCT 14"
+    "title": "",
+    "excerpt": "",
+    "date": ""
   },
   "heroHeadline": "Designing the next wave of software systems.",
   "introDuration": 3200,
@@ -117,7 +172,7 @@
     "Aspiring DevSecOps, Cloud & System Design Engineer passionate about building secure, scalable, and automated infrastructure. I specialize in cloud-native technologies, infrastructure automation, container orchestration, observability, and cybersecurity, with a focus on designing resilient distributed systems for real-world environments."
   ],
   "workingCategory": "Currently Working On",
-  "workingTitle": "Learning Java & Backend Systems",
+  "workingTitle": "Java & Backend Systems",
   "workingDesc": "Deep diving into Java OOP principles, JVM memory management, multi-threaded task handling, and Spring Boot API architectures.",
   "themeId": "wheat"
 }
