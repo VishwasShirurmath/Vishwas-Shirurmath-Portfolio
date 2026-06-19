@@ -127,13 +127,26 @@ export default function App() {
 
   // Intro State
   const [showIntro, setShowIntro] = useState(true);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+
+  useEffect(() => {
+    if (!showIntro) {
+      setShowWelcomeMessage(true);
+      const timer = setTimeout(() => {
+        setShowWelcomeMessage(false);
+      }, 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [showIntro]);
 
   // Active theme styling state (Sleek Warm Theme with persistent storage)
   const [activeTheme, setActiveTheme] = useState<ThemePreset>(() => {
-    const savedThemeId = localStorage.getItem('owner_active_theme_id');
-    if (savedThemeId) {
-      const found = THEME_PRESETS.find(p => p.id === savedThemeId);
-      if (found) return found;
+    if (isLocalEnvironment) {
+      const savedThemeId = localStorage.getItem('owner_active_theme_id');
+      if (savedThemeId) {
+        const found = THEME_PRESETS.find(p => p.id === savedThemeId);
+        if (found) return found;
+      }
     }
     const fallbackThemeId = USER_DATA.themeId || "wheat";
     if (fallbackThemeId) {
@@ -160,38 +173,48 @@ export default function App() {
   // Master local storage portfolio data sets
   // Use USER_DATA as ultimate fallback instead of INITIAL_PROFILE
   const [profile, setProfile] = useState<ProfileInfo>(() => {
-    const saved = localStorage.getItem('portfolio_profile');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return USER_DATA.profile; }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_profile');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { return USER_DATA.profile; }
+      }
     }
     return USER_DATA.profile;
   });
 
   const [projects, setProjects] = useState<ProjectEntry[]>(() => {
-    const saved = localStorage.getItem('portfolio_projects');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return USER_DATA.projects || []; }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_projects');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { return USER_DATA.projects || []; }
+      }
     }
     return USER_DATA.projects || [];
   });
 
   const [blogs, setBlogs] = useState<BlogPost[]>(() => {
-    const saved = localStorage.getItem('portfolio_blogs');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return USER_DATA.blogs || []; }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_blogs');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { return USER_DATA.blogs || []; }
+      }
     }
     return USER_DATA.blogs || [];
   });
 
   const [spotlightProject, setSpotlightProject] = useState(() => {
-    const saved = localStorage.getItem('owner_spotlight');
-    if (saved) return JSON.parse(saved);
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_spotlight');
+      if (saved) return JSON.parse(saved);
+    }
     return USER_DATA.spotlightProject;
   });
 
   const [featuredBlog, setFeaturedBlog] = useState(() => {
-    const saved = localStorage.getItem('owner_featured_blog');
-    if (saved) return JSON.parse(saved);
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_featured_blog');
+      if (saved) return JSON.parse(saved);
+    }
     return USER_DATA.featuredBlog;
   });
 
@@ -211,41 +234,80 @@ export default function App() {
 
   // Animated Landing Page custom presets & editable variables
   const [introDuration, setIntroDuration] = useState<number>(() => {
-    const saved = localStorage.getItem('portfolio_intro_duration');
-    return saved ? parseInt(saved, 10) : (USER_DATA.introDuration || 3200);
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_intro_duration');
+      if (saved) return parseInt(saved, 10);
+    }
+    return USER_DATA.introDuration || 3200;
   });
 
   const [introSteps, setIntroSteps] = useState<string[]>(() => {
-    const saved = localStorage.getItem('portfolio_intro_steps');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_intro_steps');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { }
+      }
     }
     return USER_DATA.introSteps || [];
   });
 
   // Interactive Hero Headline
-  const [heroHeadline, setHeroHeadline] = useState(() => localStorage.getItem('portfolio_hero_headline') || USER_DATA.heroHeadline || "Designing the next wave of software systems.");
+  const [heroHeadline, setHeroHeadline] = useState(() => {
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_hero_headline');
+      if (saved) return saved;
+    }
+    return USER_DATA.heroHeadline || "Designing the next wave of software systems.";
+  });
 
   // Experience state
   const [experiences, setExperiences] = useState<ExperienceEntry[]>(() => {
-    const saved = localStorage.getItem('portfolio_experiences');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return USER_DATA.experiences || []; }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('portfolio_experiences');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { return USER_DATA.experiences || []; }
+      }
     }
     return USER_DATA.experiences || [];
   });
 
   // Working focus states
-  const [workingCategory, setWorkingCategory] = useState(() => localStorage.getItem('owner_working_category') || USER_DATA.workingCategory || "Currently Working On");
-  const [workingTitle, setWorkingTitle] = useState(() => localStorage.getItem('owner_working_title') || USER_DATA.workingTitle || "Learning.");
-  const [workingDesc, setWorkingDesc] = useState(() => localStorage.getItem('owner_working_desc') || USER_DATA.workingDesc || "Deep diving into concepts.");
+  const [workingCategory, setWorkingCategory] = useState(() => {
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_working_category');
+      if (saved) return saved;
+    }
+    return USER_DATA.workingCategory || "Currently Working On";
+  });
+  const [workingTitle, setWorkingTitle] = useState(() => {
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_working_title');
+      if (saved) return saved;
+    }
+    return USER_DATA.workingTitle || "Learning.";
+  });
+  const [workingDesc, setWorkingDesc] = useState(() => {
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_working_desc');
+      if (saved) return saved;
+    }
+    return USER_DATA.workingDesc || "Deep diving into concepts.";
+  });
 
   // DSA Sync Hub state variables
-  const [showHeatmap, setShowHeatmap] = useState(() => localStorage.getItem('owner_show_heatmap') !== 'false');
+  const [showHeatmap, setShowHeatmap] = useState(() => {
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_show_heatmap');
+      if (saved) return saved !== 'false';
+    }
+    return true;
+  });
   
   const [dsaPlatforms, setDsaPlatforms] = useState<any[]>(() => {
-    const saved = localStorage.getItem('owner_dsa_platforms_v2');
-    if (saved) return JSON.parse(saved);
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_dsa_platforms_v2');
+      if (saved) return JSON.parse(saved);
+    }
     return USER_DATA.dsaPlatforms || [];
   });
 
@@ -255,21 +317,25 @@ export default function App() {
 
   // Tech learning areas
   const [learningAreas, setLearningAreas] = useState<{ domain: string; platform: string; topics: string; duration: string }[]>(() => {
-    const saved = localStorage.getItem('owner_tech_learning_areas');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_tech_learning_areas');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { }
+      }
     }
     return USER_DATA.learningAreas || [];
   });
 
   // Extracurricular dynamic states
   const [extracurriculars, setExtracurriculars] = useState<ExtraCurricularEntry[]>(() => {
-    const saved = localStorage.getItem('owner_extracurriculars');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { }
+    if (isLocalEnvironment) {
+      const saved = localStorage.getItem('owner_extracurriculars');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (e) { }
+      }
     }
     return USER_DATA.extracurriculars || [];
   });
@@ -838,6 +904,26 @@ export default function App() {
                 >
                   {profile.name.toUpperCase()}
                 </span>
+                
+                <AnimatePresence>
+                  {showWelcomeMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className={`absolute top-full mt-4 left-0 w-64 z-50 px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 backdrop-blur-md border ${isDarkMode ? 'bg-[#1a1a1a]/95 text-stone-100 border-stone-800' : 'bg-white/95 text-stone-900 border-stone-200'}`}
+                    >
+                      <div className={`p-1.5 rounded-full shrink-0 ${isDarkMode ? 'bg-amber-500/20 text-amber-500' : 'bg-amber-100 text-amber-600'}`}>
+                        <span className="text-lg">👋</span>
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-xs tracking-wide">Welcome to my space!</h4>
+                        <p className={`text-[10px] uppercase font-mono mt-0.5 tracking-wider leading-tight ${isDarkMode ? 'text-stone-400' : 'text-stone-500'}`}>Feel free to explore</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
