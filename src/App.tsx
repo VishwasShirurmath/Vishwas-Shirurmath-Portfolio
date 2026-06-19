@@ -452,6 +452,9 @@ export default function App() {
   // Sync Master states with localStorage on changes
   useEffect(() => {
     localStorage.setItem('portfolio_profile', JSON.stringify(profile));
+    if (profile && profile.name) {
+      document.title = `${profile.name} - Portfolio`;
+    }
   }, [profile]);
 
   useEffect(() => {
@@ -774,7 +777,7 @@ export default function App() {
                           : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
                     }`}
                   >
-                    {tab === 'activity' ? 'DSA & Tech Tracker' : tab === 'extracurricular' ? 'Other Activities' : tab === 'crm' ? 'Content Studio' : tab}
+                    {tab === 'activity' ? 'Platform Integrations' : tab === 'extracurricular' ? 'Other Activities' : tab === 'crm' ? 'Content Studio' : tab}
                   </button>
                 );
               })}
@@ -782,21 +785,6 @@ export default function App() {
 
             {/* Quick Actions Console */}
             <div className="flex items-center gap-2">
-              {!isOwner && isLocalEnvironment && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPasswordError('');
-                    setPasswordInput('');
-                    setShowPasswordModal(true);
-                  }}
-                  className={`flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-300 border-stone-250 bg-stone-50 text-stone-500 hover:text-amber-600 hover:bg-stone-100 shadow-xs`}
-                  title="Creator/Owner Login Gateway"
-                >
-                  <Lock className="h-4 w-4 text-stone-400 hover:text-amber-500 transition" />
-                </button>
-              )}
-
               {/* Customizer / Quick Action button - Secured for Owner Only */}
               {isOwner && isLocalEnvironment && (
                 <div className="flex items-center gap-1.5">
@@ -1516,7 +1504,7 @@ export default function App() {
                 </motion.div>
               )}
 
-              {/* DSA & TECH TARGET SYNCHRONIZER VIEW */}
+              {/* PLATFORM INTEGRATIONS & METRICS VIEW */}
               {activeTab === 'activity' && (
                 <motion.div
                   key="activity-tab"
@@ -1537,7 +1525,7 @@ export default function App() {
                         </div>
                         <div>
                           <h2 className={`text-2xl font-extrabold tracking-tight ${isDarkMode ? 'text-stone-100' : 'text-stone-900'}`}>
-                            DSA & Tech Platform Sync Hub
+                            Platform Sync & Metrics Hub
                           </h2>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#10B981]/15 text-[#10B981] font-mono animate-pulse">
@@ -1550,7 +1538,7 @@ export default function App() {
                         </div>
                       </div>
                       <p className={`text-xs leading-relaxed ${isDarkMode ? 'text-stone-400' : 'text-stone-600'} mt-3`}>
-                        This synchronization gateway aggregates and verifies credentials, profile badges, and active problem metrics from top-tier online platforms (Tough DSA, GeeksforGeeks, and LeetCode). Re-verify alignment securely via live cryptographical hashes.
+                        This synchronization gateway aggregates and verifies credentials, profile badges, and active activity metrics from top-tier online platforms (HackerRank, GitHub, and LeetCode). Re-verify alignment securely via live cryptographical hashes.
                       </p>
                     </div>
 
@@ -1561,7 +1549,7 @@ export default function App() {
                           setIsSyncing(true);
                           triggerToast("Establishing handshake protocols with platforms...");
                           setTimeout(() => {
-                            triggerToast("Caching solved count from Tough DSA (184 problems)...");
+                            triggerToast("Caching platform performance metrics...");
                           }, 1000);
                           setTimeout(() => {
                             triggerToast("Synchronizing GeeksforGeeks API (342 problems, 1452 pts)...");
@@ -1700,7 +1688,7 @@ export default function App() {
                             Verified Multi-Platform Code Commit & Problem Heatmap
                           </h3>
                           <p className="text-[10px] text-stone-400 font-mono">
-                            Aggregating hourly pushes to internal GitLab, public GitHub, Tough DSA endpoints, and GFG accounts.
+                            Aggregating activity metrics across internal repositories, GitHub, and integrated platforms.
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 text-[10px] font-mono text-stone-400">
@@ -1738,7 +1726,7 @@ export default function App() {
                                     countText = '4 problems solved, 5 local commits';
                                   } else if (sum === 6 || sum === 10) {
                                     bgClass = 'bg-[#14B8A6] hover:ring-2 hover:ring-teal-400';
-                                    countText = '6 DSA challenges compiled, 1 Cloud Blueprint mapped!';
+                                    countText = '6 development milestones achieved, 1 technical blueprint mapped!';
                                   }
 
                                   const dateStr = `June ${(colIdx + 1) + (rankIdx % 2)}, 2026`;
@@ -1895,33 +1883,13 @@ export default function App() {
             </AnimatePresence>
           </main>
 
-          {/* Minimalist Professional Footer with subtle administrative entry details */}
+          {/* Minimalist Professional Footer */}
           <footer className="mt-20 border-t border-stone-200/40 pt-8 pb-12 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 font-mono gap-4">
-            <div 
-              onDoubleClick={() => {
-                setPasswordError('');
-                setPasswordInput('');
-                setShowPasswordModal(true);
-              }}
-              className="cursor-pointer hover:text-amber-600 transition tracking-tight"
-              title="Double-click to access Owner login gateway"
-            >
+            <div>
               <span>© {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-4">
               <span>SRE & DevOps Practitioner</span>
-              <span>•</span>
-              <button 
-                onClick={() => {
-                  setPasswordError('');
-                  setPasswordInput('');
-                  setShowPasswordModal(true);
-                }}
-                className="opacity-70 hover:opacity-100 focus:opacity-100 focus:outline-none transition cursor-pointer text-[10px] bg-stone-200/50 hover:bg-stone-300/60 text-stone-700 dark:text-stone-300 dark:bg-stone-900/60 px-2.5 py-1 rounded"
-                title="Admin Authentication Gateway"
-              >
-                🔐 Owner Interface
-              </button>
             </div>
           </footer>
         </div>
@@ -2502,7 +2470,7 @@ export default function App() {
                 )}
 
                 {activeConfigSection === 'activity' && (
-                  <form onSubmit={(e) => { e.preventDefault(); triggerToast("DSA & tech platforms synchronization configuration updated successfully!"); }} className="space-y-4">
+                  <form onSubmit={(e) => { e.preventDefault(); triggerToast("Platform synchronization configuration updated successfully!"); }} className="space-y-4">
                     <h4 className="font-extrabold text-xs text-stone-900 uppercase tracking-wider font-mono">Sync Channels & Learning Paths</h4>
                     
                     <div className="flex items-center justify-between p-3 bg-stone-50 border border-stone-200 rounded-xl mb-4">
@@ -2520,7 +2488,7 @@ export default function App() {
                     </div>
 
                     <div className="border-b border-stone-150 pb-2 flex justify-between items-center pt-2">
-                      <span className="text-xs font-bold text-stone-800">DSA & Practice Platforms</span>
+                      <span className="text-xs font-bold text-stone-800">Integrated Platforms & Metrics</span>
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -3394,9 +3362,6 @@ export default function App() {
                       {passwordError}
                     </p>
                   )}
-                  <p className="text-[9px] text-stone-400 leading-normal mt-2 font-mono">
-                    * Tip: Use the master key <span className="font-bold text-amber-600/95 font-mono">devops2026</span> or click the "Bypass" button below to enable the editor instantly.
-                  </p>
                 </div>
 
                 <div className="flex flex-col gap-2 pt-2">
@@ -3419,21 +3384,6 @@ export default function App() {
                       Set Credentials
                     </button>
                   </div>
-                  
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsOwner(true);
-                      localStorage.setItem('is_owner', 'true');
-                      setShowPasswordModal(false);
-                      setPasswordInput('');
-                      setPasswordError('');
-                      triggerToast("Bypass activated! Creator Mode is enabled. Enjoy editing!");
-                    }}
-                    className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold rounded-xl text-xs transition font-sans shadow-sm"
-                  >
-                    Bypass / Guest Editor Mode
-                  </button>
                 </div>
               </form>
             </motion.div>
